@@ -1,0 +1,24 @@
+--- entitycache.module	2011-10-27 15:45:19.000000000 +0100
++++ entitycache.module	2011-10-27 15:31:32.000000000 +0100
+@@ -61,6 +61,7 @@
+     // were passed. The $ids array is reduced as items are loaded from cache,
+     // and we need to know if it's empty for this reason to avoid querying the
+     // database when all requested entities are loaded from cache.
++    $ids = is_array($ids) ? array_filter($ids, array(__CLASS__, '_check_ids')) : FALSE;
+     $passed_ids = !empty($ids) ? array_flip($ids) : FALSE;
+     // Try to load entities from the static cache, if the entity type supports
+     // static caching.
+@@ -172,6 +173,13 @@
+       $function($entities);
+     }
+   }
++  
++  /**
++   * Helper to filter non string & non integer ids
++   */
++  public static function _check_ids($id) {
++    return (is_string($id) || is_int($id));
++  }
+ }
+ 
+ /**
