@@ -1,0 +1,7 @@
+About
+-----
+
+This is a repository of Drupal contrib module patches that do not have a place to live on Drupal.org. 
+These patches would mostly be combined patches of various issues that are needed per module, that touch the same
+file(s) thereby deeming individual patch inclusions impossible due to conflicts. These patches are included in the
+Distro .make file.
