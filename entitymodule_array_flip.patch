@@ -1,0 +1,40 @@
+diff --git a/includes/entity.inc b/includes/entity.inc
+index 07ee061..91c65c8 100644
+--- a/includes/entity.inc
++++ b/includes/entity.inc
+@@ -175,6 +175,7 @@ class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
+     // were passed. The $ids array is reduced as items are loaded from cache,
+     // and we need to know if it's empty for this reason to avoid querying the
+     // database when all requested entities are loaded from cache.
++    $ids = is_array($ids) ? array_filter($ids, array(__CLASS__, '_check_ids')) : FALSE;
+     $passed_ids = !empty($ids) ? array_flip($ids) : FALSE;
+     // Try to load entities from the static cache, if the entity type supports
+     // static caching.
+@@ -351,7 +352,11 @@ class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
+     // Load any available entities from the internal cache.
+     if (!empty($this->entityCache)) {
+       if ($ids) {
+-        $entities += array_intersect_key($this->entityCache, array_flip($ids));
++        // Filter out null or empty ids
++        $ids = array_filter($ids, array(__CLASS__, '_check_ids'));
++        if (!empty($ids)) {
++          $entities += array_intersect_key($this->entityCache, array_flip($ids));
++        }
+       }
+       // If loading entities only by conditions, fetch all available entities
+       // from the cache. Entities which don't match are removed later.
+@@ -382,6 +387,14 @@ class DrupalDefaultEntityController implements DrupalEntityControllerInterface {
+   protected function cacheSet($entities) {
+     $this->entityCache += $entities;
+   }
++
++  /**
++   * Helper to filter non string & non integer ids
++   */
++  public static function _check_ids($id) {
++    return (is_string($id) || is_int($id));
++  }
++
+ }
+ 
+ /**
