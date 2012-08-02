@@ -1,0 +1,101 @@
+diff --git a/views/media_default.view.inc b/views/media_default.view.inc
+index 38b8a0b..f5f4529 100644
+--- a/views/media_default.view.inc
++++ b/views/media_default.view.inc
+@@ -70,6 +70,10 @@ $handler->display->display_options['sorts']['count']['field'] = 'count';
+ $handler->display->display_options['sorts']['count']['group_type'] = 'sum';
+ $handler->display->display_options['sorts']['count']['exposed'] = TRUE;
+ $handler->display->display_options['sorts']['count']['expose']['label'] = 'Use count';
++$handler->display->display_options['filter_groups']['groups'] = array(
++  1 => 'AND',
++  2 => 'OR',
++);
+ /* Filter criterion: File: Status */
+ $handler->display->display_options['filters']['status']['id'] = 'status';
+ $handler->display->display_options['filters']['status']['table'] = 'file_managed';
+@@ -77,33 +81,66 @@ $handler->display->display_options['filters']['status']['field'] = 'status';
+ $handler->display->display_options['filters']['status']['value'] = array(
+   1 => '1',
+ );
++$handler->display->display_options['filters']['status']['group'] = 1;
++/* Filter criterion: Global: Populate filters */
++$handler->display->display_options['filters']['populate']['id'] = 'populate';
++$handler->display->display_options['filters']['populate']['table'] = 'views_filters_populate';
++$handler->display->display_options['filters']['populate']['field'] = 'populate';
++$handler->display->display_options['filters']['populate']['group'] = 1;
++$handler->display->display_options['filters']['populate']['exposed'] = TRUE;
++$handler->display->display_options['filters']['populate']['expose']['operator_id'] = '';
++$handler->display->display_options['filters']['populate']['expose']['label'] = 'Name';
++$handler->display->display_options['filters']['populate']['expose']['use_operator'] = FALSE;
++$handler->display->display_options['filters']['populate']['expose']['operator'] = 'populate_op';
++$handler->display->display_options['filters']['populate']['expose']['identifier'] = 'populate';
++$handler->display->display_options['filters']['populate']['filters'] = array(
++  'filename' => 'filename',
++  'field_file_title_value' => 'field_file_title_value',
++  'field_file_alt_text_value' => 'field_file_alt_text_value',
++  'status' => 0,
++  'type' => 0,
++);
++/* Filter criterion: File: Type */
++$handler->display->display_options['filters']['type']['id'] = 'type';
++$handler->display->display_options['filters']['type']['table'] = 'file_managed';
++$handler->display->display_options['filters']['type']['field'] = 'type';
++$handler->display->display_options['filters']['type']['group'] = 1;
++$handler->display->display_options['filters']['type']['exposed'] = TRUE;
++$handler->display->display_options['filters']['type']['expose']['operator_id'] = 'type_op';
++$handler->display->display_options['filters']['type']['expose']['label'] = 'Type';
++$handler->display->display_options['filters']['type']['expose']['operator'] = 'type_op';
++$handler->display->display_options['filters']['type']['expose']['identifier'] = 'type';
++$handler->display->display_options['filters']['type']['expose']['reduce'] = 0;
+ /* Filter criterion: File: Name */
+ $handler->display->display_options['filters']['filename']['id'] = 'filename';
+ $handler->display->display_options['filters']['filename']['table'] = 'file_managed';
+ $handler->display->display_options['filters']['filename']['field'] = 'filename';
+ $handler->display->display_options['filters']['filename']['operator'] = 'contains';
+-$handler->display->display_options['filters']['filename']['exposed'] = TRUE;
++$handler->display->display_options['filters']['filename']['group'] = 2;
+ $handler->display->display_options['filters']['filename']['expose']['operator_id'] = 'filename_op';
+ $handler->display->display_options['filters']['filename']['expose']['label'] = 'File name';
+ $handler->display->display_options['filters']['filename']['expose']['operator'] = 'filename_op';
+ $handler->display->display_options['filters']['filename']['expose']['identifier'] = 'filename';
+ $handler->display->display_options['filters']['filename']['expose']['required'] = 0;
+ $handler->display->display_options['filters']['filename']['expose']['multiple'] = FALSE;
+-/* Filter criterion: File: Type */
+-$handler->display->display_options['filters']['type']['id'] = 'type';
+-$handler->display->display_options['filters']['type']['table'] = 'file_managed';
+-$handler->display->display_options['filters']['type']['field'] = 'type';
+-$handler->display->display_options['filters']['type']['exposed'] = TRUE;
+-$handler->display->display_options['filters']['type']['expose']['operator_id'] = 'type_op';
+-$handler->display->display_options['filters']['type']['expose']['label'] = 'Type';
+-$handler->display->display_options['filters']['type']['expose']['operator'] = 'type_op';
+-$handler->display->display_options['filters']['type']['expose']['identifier'] = 'type';
+-$handler->display->display_options['filters']['type']['expose']['reduce'] = 0;
++/* Filter criterion: File: Title (field_file_title) */
++$handler->display->display_options['filters']['field_file_title_value']['id'] = 'field_file_title_value';
++$handler->display->display_options['filters']['field_file_title_value']['table'] = 'field_data_field_file_title';
++$handler->display->display_options['filters']['field_file_title_value']['field'] = 'field_file_title_value';
++$handler->display->display_options['filters']['field_file_title_value']['operator'] = 'contains';
++$handler->display->display_options['filters']['field_file_title_value']['group'] = 2;
++/* Filter criterion: File: Alt Text (field_file_alt_text) */
++$handler->display->display_options['filters']['field_file_alt_text_value']['id'] = 'field_file_alt_text_value';
++$handler->display->display_options['filters']['field_file_alt_text_value']['table'] = 'field_data_field_file_alt_text';
++$handler->display->display_options['filters']['field_file_alt_text_value']['field'] = 'field_file_alt_text_value';
++$handler->display->display_options['filters']['field_file_alt_text_value']['operator'] = 'contains';
++$handler->display->display_options['filters']['field_file_alt_text_value']['group'] = 2;
+ 
+ /* Display: Media browser */
+ $handler = $view->new_display('media_browser', 'Media browser', 'media_browser_1');
+ $handler->display->display_options['defaults']['title'] = FALSE;
+ $handler->display->display_options['title'] = 'View Library';
++
+ $translatables['media_default'] = array(
+   t('Master'),
+   t('more'),
+@@ -118,6 +155,7 @@ $translatables['media_default'] = array(
+   t('No files available.'),
+   t('Upload date'),
+   t('Use count'),
++  t('Name'),
+   t('File name'),
+   t('Type'),
+   t('Media browser'),
