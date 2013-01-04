@@ -1,0 +1,65 @@
+diff -Naur dart/modules/dart_search/dart_search.info dart_patched/modules/dart_search/dart_search.info
+--- dart/modules/dart_search/dart_search.info  2012-12-03 15:51:04.308000306 +0000
++++ dart_patched/modules/dart_search/dart_search.info	2012-12-03 16:05:06.139977263 +0000
+@@ -3,6 +3,7 @@
+ core = 7.x
+ dependencies[] = dart
+ dependencies[] = search
++dependencies[] = ctools
+ package = Advertising
+ 
+ ; Information added by drupal.org packaging script on 2012-09-10
+diff -Naur dart/modules/dart_search/dart_search.module dart_patched/modules/dart_search/dart_search.module
+--- dart/modules/dart_search/dart_search.module	2012-12-03 15:51:04.308000306 +0000
++++ dart_patched/modules/dart_search/dart_search.module	2012-12-03 16:06:06.699975604 +0000
+@@ -4,6 +4,7 @@
+  * Implements hook_dart_key_vals().
+  */
+ function dart_search_dart_key_vals($tag) {
++  ctools_include('cleanstring');
+   $key_vals = array();
+ 
+   if (arg(0) == 'search') {
+@@ -12,7 +13,7 @@
+     foreach ($keys as $key) {
+       $key_vals[] = array(
+         'key' => 'term',
+-        'val' => drupal_strtolower(preg_replace("/[^A-Za-z0-9_\-]/", "", str_replace(' ', variable_get('dart_key_vals_separator', '-'), $key))),
++        'val' => ctools_cleanstring($key, array('lower case' => TRUE, 'separator' => variable_get('dart_key_vals_separator', '-'))),
+         'eval' => FALSE,
+       );
+     }
+diff -Naur dart/modules/dart_taxonomy/dart_taxonomy.info dart_patched/modules/dart_taxonomy/dart_taxonomy.info
+--- dart/modules/dart_taxonomy/dart_taxonomy.info	2012-12-03 15:51:04.324000307 +0000
++++ dart_patched/modules/dart_taxonomy/dart_taxonomy.info	2012-12-03 16:03:18.667980205 +0000
+@@ -2,6 +2,7 @@
+ description = Allows taxonomy terms to be included in DART tags. Deprecated: Use the DART Ad Categories settings that now come with the DART module.
+ core = 7.x
+ dependencies[] = dart
++dependencies[] = ctools
+ package = Advertising
+ 
+ project = "dart"
+diff -Naur dart/modules/dart_taxonomy/dart_taxonomy.module dart_patched/modules/dart_taxonomy/dart_taxonomy.module
+--- dart/modules/dart_taxonomy/dart_taxonomy.module	2012-12-03 15:51:04.320000307 +0000
++++ dart_patched/modules/dart_taxonomy/dart_taxonomy.module	2012-12-03 16:04:35.695978094 +0000
+@@ -377,7 +377,8 @@
+  *   truncated term name
+  */
+ function _dart_taxonomy_callback_truncated($term, $char_count = 6) {
+-  return drupal_substr(drupal_strtolower(preg_replace("/[^A-Za-z0-9]/", "", $term->name )), 0, $char_count);
++  ctools_include('cleanstring');
++  return ctools_cleanstring($term->name, array('lower case' => TRUE, 'separator' => variable_get('dart_key_vals_separator', '-'), 'max length' => $char_count));
+ }
+ 
+ /**
+@@ -392,7 +393,8 @@
+  *   term name
+  */
+ function _dart_taxonomy_callback_full($term) {
+-  return drupal_strtolower(preg_replace("/[^A-Za-z0-9_\-]/", "", str_replace(' ', variable_get('dart_key_vals_separator', '-'), $term->name) ));
++  ctools_include('cleanstring');
++  return ctools_cleanstring($term->name, array('lower case' => TRUE, 'separator' => variable_get('dart_key_vals_separator', '-')));
+ }
+ 
+ /**
