@@ -1,0 +1,17 @@
+diff --git a/subpathauto.module b/subpathauto.module
+index def9f1b..53ab80d 100644
+--- a/subpathauto.module
++++ b/subpathauto.module
+@@ -20,6 +20,12 @@ function subpathauto_menu() {
+  * Implements hook_url_inbound_alter().
+  */
+ function subpathauto_url_inbound_alter(&$path, $original_path, $language) {
++  // If redirect module is enabled, check for a redirect on this path.
++  if (module_exists('redirect') && $redirect = redirect_load_by_source($path, $GLOBALS['language']->language, drupal_get_query_parameters())) {
++    // Redirect found, return false and let redirect module handle it.
++    return FALSE;
++  }
++
+   if ($source = subpathauto_lookup_subpath('source', $path, $original_path, $language)) {
+     $path = $source;
+   }
