@@ -1,0 +1,21 @@
+diff --git a/modules/taxonomy/taxonomy.admin.inc b/modules/taxonomy/taxonomy.admin.inc
+index 828fde0..90a9f44 100644
+--- a/modules/taxonomy/taxonomy.admin.inc
++++ b/modules/taxonomy/taxonomy.admin.inc
+@@ -675,6 +675,16 @@ function taxonomy_form_term($form, &$form_state, $edit = array(), $vocabulary =
+     return array_merge($form, taxonomy_term_confirm_delete($form, $form_state, $term->tid));
+   }
+ 
++  if (!empty($term->name)) {
++    $form['vocabulary'] = array(
++      '#markup' => '<b>' . t('Vocabulary') . ':</b>&nbsp;' . l($vocabulary->name, 'admin/structure/taxonomy/' . $vocabulary->machine_name),
++      '#weight' => -6,
++    );
++    $breadcrumb[] = l(t('Home'), NULL);
++    $breadcrumb[] = l($vocabulary->name, 'admin/structure/taxonomy/' . $vocabulary->machine_name);
++    $breadcrumb[] = l($term->name, 'taxonomy/term/' . $term->tid);
++    drupal_set_breadcrumb($breadcrumb);
++  }
+   $form['name'] = array(
+     '#type' => 'textfield',
+     '#title' => t('Name'),
