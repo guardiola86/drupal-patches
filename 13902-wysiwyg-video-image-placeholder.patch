@@ -9,7 +9,7 @@ diff --git a/js/wysiwyg-media.js b/js/wysiwyg-media.js
 +    //HACK for media (ie, videos) that consists of nothing *but* divs (See http://fogbugz.dennisinteractive.co.uk/default.asp?13902#BugEvent.93413)
 +
 +    if(!stripped.length) {
-+    	stripped = '<img src="/profiles/dennis_distro/modules/contrib/media/images/icons/default/video-x-generic.png" width="180" height="180" />';
++    	stripped = '<img src="/profiles/dennis_distro/modules/contrib/media/images/icons/default/video-x-generic.png" />';
 +    }
 +    
      // This will fail if we pass the img tag without anything wrapping it, like we do when re-enabling WYSIWYG
