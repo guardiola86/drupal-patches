@@ -1,0 +1,39 @@
+diff --git a/modules/taxonomy/taxonomy.admin.inc b/modules/taxonomy/taxonomy.admin.inc
+index 828fde0..d728d1e 100644
+--- a/modules/taxonomy/taxonomy.admin.inc
++++ b/modules/taxonomy/taxonomy.admin.inc
+@@ -675,6 +675,16 @@ function taxonomy_form_term($form, &$form_state, $edit = array(), $vocabulary =
+     return array_merge($form, taxonomy_term_confirm_delete($form, $form_state, $term->tid));
+   }
+ 
++  if (!empty($term->name)) {
++    $form['vocabulary'] = array(
++      '#markup' => '<b>' . t('Vocabulary') . ':</b>&nbsp;' . l($vocabulary->name, 'admin/structure/taxonomy/' . $vocabulary->machine_name),
++      '#weight' => -6,
++    );
++    $breadcrumb[] = l(t('Home'), NULL);
++    $breadcrumb[] = l($vocabulary->name, 'admin/structure/taxonomy/' . $vocabulary->machine_name);
++    $breadcrumb[] = l($term->name, 'taxonomy/term/' . $term->tid);
++    drupal_set_breadcrumb($breadcrumb);
++  }
+   $form['name'] = array(
+     '#type' => 'textfield',
+     '#title' => t('Name'),
+diff --git a/modules/taxonomy/taxonomy.test b/modules/taxonomy/taxonomy.test
+index 123bdce..6243dd4 100644
+--- a/modules/taxonomy/taxonomy.test
++++ b/modules/taxonomy/taxonomy.test
+@@ -803,6 +803,13 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
+     // the first edit link found on the listing page is to our term.
+     $this->clickLink(t('edit'));
+ 
++    // Test vocabulary link.
++    $this->clickLink($this->vocabulary->name);
++    $this->assertLink(t('Add term'));
++
++    // Go back to term page.
++    $this->clickLink(t('edit'));
++
+     $this->assertRaw($edit['name'], 'The randomly generated term name is present.');
+     $this->assertText($edit['description[value]'], 'The randomly generated term description is present.');
+ 
