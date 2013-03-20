@@ -1,0 +1,44 @@
+[1mdiff --git a/README.txt b/README.txt[m
+[1mindex 3a80d40..c8dbc3a 100644[m
+[1m--- a/README.txt[m
+[1m+++ b/README.txt[m
+[36m@@ -26,6 +26,15 @@[m [mhook_dart_key_vals($tag) - use this to add/alter a key|value pair to a tag.[m
+ hook_dart_tag_settings_data_structure_alter(&$structure) - use this to tell the dart module to include another piece of tag-specific data in the database (advanced users only)[m
+ [m
+ - JS Overrides[m
+[32m+[m[32mYou can manipulate the tag object before the ad tag string is constructed by including the following js in your module:[m
+[32m+[m
+[32m+[m[32m  $(document).bind('dart_tag_process', function(event, tag){[m
+[32m+[m[32m    // modify tag however you see fit and then return it.[m
+[32m+[m[32m    // example of adding a new key|val pair:[m
+[32m+[m
+[32m+[m[32m    tag.key_vals['myNewKey'] = [{val: 'myNewValue', eval: false}];;[m
+[32m+[m[32m  });[m
+[32m+[m
+ Finally, you can override a completely rendered tag at the very last second by including the following js in your module:[m
+ [m
+   $(document).bind('dart_tag_render', function(event, tag){[m
+[1mdiff --git a/dart.js b/dart.js[m
+[1mindex a66a95b..858d362 100644[m
+[1m--- a/dart.js[m
+[1m+++ b/dart.js[m
+[36m@@ -21,6 +21,10 @@[m [mDrupal.DART.tag = function(tag) {[m
+   var tagname = tag.settings.options.method == 'adj' ? 'script' : 'iframe';[m
+   var options = tag.settings.options.method == 'adj' ? 'type="text/javascript"' : 'frameborder="0" scrolling="no" width="' + tag.sz.split("x")[0] + '" height="' + tag.sz.split("x")[1] + '"';[m
+ [m
+[32m+[m[32m  // Allow other modules to include js that can manipulate the tag object.[m
+[32m+[m[32m  var processed_tag = ($ !== undefined) ? $(document).triggerHandler('dart_tag_process', [tag]) : undefined;[m
+[32m+[m[32m  tag = processed_tag !== undefined ? processed_tag : tag;[m
+[32m+[m
+   ad = '<' + tagname + ' ' + options + ' src="';[m
+   ad += dart_url + "/";[m
+   ad += tag.network_id !== '' ? tag.network_id + "/" : "";[m
+[36m@@ -28,7 +32,7 @@[m [mDrupal.DART.tag = function(tag) {[m
+   ad += tag.prefix + '.' + tag.site + "/" + tag.zone + ";";[m
+   ad += this.keyVals(tag.key_vals);[m
+ [m
+[31m-  // Allow other modules to include js that can manipulate each key|val.[m
+[32m+[m[32m  // Allow other modules to include js that can manipulate the concatenated tag string.[m
+   rendered_ad = ($ !== undefined) ? $(document).triggerHandler('dart_tag_render', [ad]) : undefined;[m
+   ad = rendered_ad !== undefined ? rendered_ad : ad; ad += '"></' + tagname + '>';[m
+ [m
