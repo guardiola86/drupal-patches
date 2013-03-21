@@ -1,0 +1,45 @@
+diff --git a/README.txt b/README.txt
+index 3a80d40..4aecc31 100644
+--- a/README.txt
++++ b/README.txt
+@@ -26,6 +26,16 @@ hook_dart_key_vals($tag) - use this to add/alter a key|value pair to a tag.
+ hook_dart_tag_settings_data_structure_alter(&$structure) - use this to tell the dart module to include another piece of tag-specific data in the database (advanced users only)
+ 
+ - JS Overrides
++You can manipulate the tag object before the ad tag string is constructed by
++including the following js in your module:
++
++  $(document).bind('dart_tag_process', function(event, tag){
++    // modify tag however you see fit and then return it.
++    // example of adding a new key|val pair:
++
++    tag.key_vals['myNewKey'] = [{val: 'myNewValue', eval: false}];;
++  });
++
+ Finally, you can override a completely rendered tag at the very last second by including the following js in your module:
+ 
+   $(document).bind('dart_tag_render', function(event, tag){
+diff --git a/dart.js b/dart.js
+index a66a95b..858d362 100644
+--- a/dart.js
++++ b/dart.js
+@@ -21,6 +21,10 @@ Drupal.DART.tag = function(tag) {
+   var tagname = tag.settings.options.method == 'adj' ? 'script' : 'iframe';
+   var options = tag.settings.options.method == 'adj' ? 'type="text/javascript"' : 'frameborder="0" scrolling="no" width="' + tag.sz.split("x")[0] + '" height="' + tag.sz.split("x")[1] + '"';
+ 
++  // Allow other modules to include js that can manipulate the tag object.
++  var processed_tag = ($ !== undefined) ? $(document).triggerHandler('dart_tag_process', [tag]) : undefined;
++  tag = processed_tag !== undefined ? processed_tag : tag;
++
+   ad = '<' + tagname + ' ' + options + ' src="';
+   ad += dart_url + "/";
+   ad += tag.network_id !== '' ? tag.network_id + "/" : "";
+@@ -28,7 +32,7 @@ Drupal.DART.tag = function(tag) {
+   ad += tag.prefix + '.' + tag.site + "/" + tag.zone + ";";
+   ad += this.keyVals(tag.key_vals);
+ 
+-  // Allow other modules to include js that can manipulate each key|val.
++  // Allow other modules to include js that can manipulate the concatenated tag string.
+   rendered_ad = ($ !== undefined) ? $(document).triggerHandler('dart_tag_render', [ad]) : undefined;
+   ad = rendered_ad !== undefined ? rendered_ad : ad; ad += '"></' + tagname + '>';
+ 
