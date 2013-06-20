@@ -1,0 +1,9 @@
+diff --git a/chosen.make b/chosen.make
+index 2cb89c3..fdc8625 100644
+--- a/chosen.make
++++ b/chosen.make
+@@ -3,3 +3,4 @@ api  = 2
+ 
+ libraries[chosen][download][type] = git
+ libraries[chosen][download][url]  = https://github.com/harvesthq/chosen.git
++libraries[chosen][download][tag]  = v0.9.15
