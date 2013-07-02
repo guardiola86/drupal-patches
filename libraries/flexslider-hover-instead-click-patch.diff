@@ -1,0 +1,13 @@
+diff --git a/jquery.flexslider.js b/jquery.flexslider.js
+index 7f68c9b..0f7c6c2 100644
+--- a/jquery.flexslider.js
++++ b/jquery.flexslider.js
+@@ -139,7 +139,7 @@
+           slider.animatingTo = Math.floor(slider.currentSlide/slider.move);
+           slider.currentItem = slider.currentSlide;
+           slider.slides.removeClass(namespace + "active-slide").eq(slider.currentItem).addClass(namespace + "active-slide");
+-          slider.slides.click(function(e){
++          slider.slides.hover(function(e){
+             e.preventDefault();
+             var $slide = $(this),
+                 target = $slide.index();
