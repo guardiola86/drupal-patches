@@ -8,7 +8,7 @@ index 419511b..608b1b2 100644
    // Add the js needed to define this adSlot to <head>.
 -  $js = 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
 +  if (isset($tag->out_of_page)) {
-+    $js = 'googletag.defineOutOfPageSlot("' . $tag->adunit . '", ' . $tag->placeholder_id . '")' . "\n";
++    $js = 'googletag.defineOutOfPageSlot("' . $tag->adunit . '", "' . $tag->placeholder_id . '")' . "\n";
 +  } else {
 +    $js = 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
 +  }
