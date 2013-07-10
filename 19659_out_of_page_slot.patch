@@ -1,5 +1,5 @@
 diff --git a/dfp.module b/dfp.module
-index 419511b..608b1b2 100644
+index 419511b..c1a6b57 100644
 --- a/dfp.module
 +++ b/dfp.module
 @@ -692,7 +692,11 @@ function _dfp_js_global_settings() {
