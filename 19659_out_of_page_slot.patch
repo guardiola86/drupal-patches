@@ -1,0 +1,35 @@
+diff --git a/dfp.module b/dfp.module
+index c377ed2..b644c2a 100644
+--- a/dfp.module
++++ b/dfp.module
+@@ -716,7 +716,11 @@ function _dfp_js_global_settings() {
+  */
+ function _dfp_js_slot_definition($tag) {
+   // Add the js needed to define this adSlot to <head>.
+-  $js = 'googletag.slots.' . $tag->machinename . ' = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
++  if (isset($tag->out_of_page)) {
++    $js = 'googletag.defineOutOfPageSlot("' . $tag->adunit . '", ' . $tag->placeholder_id . '")' . "\n";
++  } else {
++    $js = 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
++  }
+   $js .= '  .addService(googletag.pubads())' . "\n";
+ 
+   if (!empty($tag->adsense_ad_types)) {
+diff --git a/plugins/export_ui/dfp_ctools_export_ui.inc b/plugins/export_ui/dfp_ctools_export_ui.inc
+index ac859d0..6bf7307 100644
+--- a/plugins/export_ui/dfp_ctools_export_ui.inc
++++ b/plugins/export_ui/dfp_ctools_export_ui.inc
+@@ -143,6 +143,13 @@ function dfp_tag_form(&$form, &$form_state) {
+     '#default_value' => $tag->settings['short_tag'],
+     '#parents' => array('settings', 'short_tag'),
+   );
++  $form['tag_display_options']['out_of_page'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Out of page (interstitial) ad slot'),
++    '#description' => t('Constructs an out of page (interstitial) ad slot.'),
++    '#default_value' => $tag->settings['out_of_page'],
++    '#parents' => array('settings', 'out_of_page'),
++  );
+ 
+   // Targeting options.
+   $form['targeting_settings'] = array(
