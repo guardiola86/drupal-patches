@@ -108,7 +108,7 @@ index 5df3632..68b03e1 100644
 +
 +  // Drupal core does not allow for multiple term ids. Allow certain handlers to except multiple term ids.
 +  // All other display plugins need to be passed a term object instead.
-+  $allow_multiple_tids = array('TaxonomyDisplayAssociatedDisplayHandlerViews', 'TaxonomyDisplayAssociatedDisplayHandlerFunction')
++  $allow_multiple_tids = array('TaxonomyDisplayAssociatedDisplayHandlerViews', 'TaxonomyDisplayAssociatedDisplayHandlerFunction');
 +  if (in_array(get_class($associated_display), $allow_multiple_tids) {
 +    $build = array_merge($build, $associated_display->displayAssociated($terms, $display_settings->associated_display_options));
 +  }
