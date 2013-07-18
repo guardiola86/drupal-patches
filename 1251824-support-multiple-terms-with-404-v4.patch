@@ -1,0 +1,175 @@
+diff --git a/handlers/associated/views.inc b/handlers/associated/views.inc
+index c40b6ef..e99e589 100644
+--- a/handlers/associated/views.inc
++++ b/handlers/associated/views.inc
+@@ -21,11 +21,14 @@ class TaxonomyDisplayAssociatedDisplayHandlerViews extends TaxonomyDisplayAssoci
+    *
+    * @see TaxonomyDisplayAssociatedDisplayHandler::displayAssociated()
+    */
+-  public function displayAssociated($term, $options = NULL) {
++  public function displayAssociated($terms, $options = NULL) {
+     module_load_include('module', 'views');
+ 
+     $build = array();
+ 
++    // Also load first term in array for backwards compatibility
++    $term = taxonomy_term_load($terms[0]);
++
+     // The code below essentially mimics views_embed_view() but outputs a
+     // watchdog error if the view/view display isn't valid.
+ 
+@@ -49,7 +52,7 @@ class TaxonomyDisplayAssociatedDisplayHandlerViews extends TaxonomyDisplayAssoci
+       $view->override_path = 'taxonomy/term/%';
+ 
+       // Generate the view's output.
+-      $output = $view->preview($options['display'], array($term->tid));
++      $output = $view->preview($options['display'], $terms);
+       if ($output) {
+         $build['view'] = array(
+           '#markup' => $output,
+diff --git a/taxonomy_display.module b/taxonomy_display.module
+index 5df3632..68b03e1 100644
+--- a/taxonomy_display.module
++++ b/taxonomy_display.module
+@@ -142,11 +142,20 @@ function taxonomy_display_menu_alter(&$items) {
+   if (!variable_get('page_manager_term_view_disabled', TRUE)) {
+     return;
+   }
+-
+-  $items['taxonomy/term/%taxonomy_term']['page callback'] = 'taxonomy_display_taxonomy_term_page';
+-  $items['taxonomy/term/%taxonomy_term']['title callback'] = 'taxonomy_display_taxonomy_term_title';
+-  $items['taxonomy/term/%taxonomy_term']['file'] = 'taxonomy_display.module';
+-  $items['taxonomy/term/%taxonomy_term']['module'] = 'taxonomy_display';
++  // Normally menu items should only be modified in hook_menu_alter. However in
++  // this case we are completely replacing taxonomy's menu item with our own so
++  // that we can handle multiple terms. This requires more invasive
++  // modification.
++  unset($items['taxonomy/term/%taxonomy_term']);
++  $items['taxonomy/term/%'] = array(
++    'page callback' => 'taxonomy_display_taxonomy_term_page',
++    'page arguments' => array(2),
++    'title callback' => 'taxonomy_display_taxonomy_term_title',
++    'title arguments' => array(2),
++    'file' => 'taxonomy_display.module',
++    'module' => 'taxonomy_display',
++    'access arguments' => array('access content'),
++  );
+ }
+ 
+ /**
+@@ -340,15 +349,27 @@ function taxonomy_display_save_taxonomy_display($machine_name, $save_data = arra
+ }
+ 
+ /**
+- * Page callback; displays all nodes associated with a term.
++ * Page callback; displays all nodes associated with one or more terms.
+  *
+- * @param $term
+- *   A term object.
++ * @param $tids
++ *   A string of term ids to be loaded, each separated by a space.
+  *
+  * @return
+  *   The page content.
+  */
+-function taxonomy_display_taxonomy_term_page($term) {
++function taxonomy_display_taxonomy_term_page($tids) {
++  // Transform terms from a string or an array.
++  // @todo Also check to be sure that the resulting terms are numeric.
++  $terms = explode(" ", $tids);
++
++  // Process the first term in the array, primarily for backwards compatibility
++  // with previous releases of Taxonomy Display (all plugins except views
++  // assume that only a single term will be used).
++  $term = taxonomy_term_load($terms[0]);
++  if (!$term) {
++    drupal_not_found();
++  }
++
+   // Ensure custom display settings for taxonomy term page are enabled before
+   // altering.
+   $view_mode = field_view_mode_settings('taxonomy_term', $term->vocabulary_machine_name);
+@@ -360,10 +381,6 @@ function taxonomy_display_taxonomy_term_page($term) {
+   // Expose our $term object to altering.
+   drupal_alter('taxonomy_display_term_page_term_object', $term);
+ 
+-  // taxonomy_term_page() sets the title this way, if flexibility is requested
+-  // it can always be added to the module as a configurable setting.
+-  drupal_set_title($term->name);
+-
+   // Load settings for this vocabulary term.
+   $display_settings = taxonomy_display_fetch_taxonomy_display($term->vocabulary_machine_name);
+ 
+@@ -385,7 +402,16 @@ function taxonomy_display_taxonomy_term_page($term) {
+ 
+   // Associated content display
+   $associated_display = new $display_settings->associated_display_plugin;
+-  $build = array_merge($build, $associated_display->displayAssociated($term, $display_settings->associated_display_options));
++
++  // Drupal core does not allow for multiple term ids. Allow certain handlers to except multiple term ids.
++  // All other display plugins need to be passed a term object instead.
++  $allow_multiple_tids = array('TaxonomyDisplayAssociatedDisplayHandlerViews', 'TaxonomyDisplayAssociatedDisplayHandlerFunction')
++  if (in_array(get_class($associated_display), $allow_multiple_tids) {
++    $build = array_merge($build, $associated_display->displayAssociated($terms, $display_settings->associated_display_options));
++  }
++  else {
++    $build = array_merge($build, $associated_display->displayAssociated($term, $display_settings->associated_display_options));
++  }
+ 
+   return $build;
+ }
+@@ -393,19 +419,45 @@ function taxonomy_display_taxonomy_term_page($term) {
+ /**
+  * Title callback; display title for term pages.
+  *
+- * As of now we do not do anything with this. If we come up with something that
+- * would be helpful or requested we can add it. This is simply to make all of
+- * the hook_menu_alter functions we changed point to the same module.
+- *
+- * @param $term
+- *   A term object.
++ * @param $tids
++ *   A string of term ids to be loaded, each separated by a space.
+  *
+  * @return
+  *   The term name to be used as the page title.
+  */
+-function taxonomy_display_taxonomy_term_title($term) {
+-  return function_exists('i18n_taxonomy_term_name') ?
+-      i18n_taxonomy_term_name($term) : taxonomy_term_title($term);
++function taxonomy_display_taxonomy_term_title($tids) {
++  // Transform terms from a string or an array.
++  // @todo Also check to be sure that the resulting terms are numeric.
++  $terms = explode(" ", $tids);
++
++  // Process the first term in the array, primarily for backwards compatibility
++  // with previous releases of Taxonomy Display (all plugins except views
++  // assume that only a single term will be used).
++  $term = taxonomy_term_load($terms[0]);
++  if (!$term) {
++    return FALSE;
++  }
++
++  // Check if the term is multiple. If yes, handle that case specially. If no,
++  // pass off as before.
++  if (count($terms) > 1) {
++    $loaded_terms = taxonomy_term_load_multiple($terms);
++    $names = array();
++    foreach ($loaded_terms as $term) {
++      if ($term) {
++        $names[] = $term->name;
++      }
++    }
++    $title = implode(' ', $names);
++  }
++  else if (function_exists('i18n_taxonomy_term_name')) {
++    $title = i18n_taxonomy_term_name($term);
++  }
++  else {
++    $title = taxonomy_term_title($term);
++  }
++
++  return $title;
+ }
+ 
+ /**
