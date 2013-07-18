@@ -95,10 +95,10 @@ index 5df3632..8fcf060 100644
    $associated_display = new $display_settings->associated_display_plugin;
 -  $build = array_merge($build, $associated_display->displayAssociated($term, $display_settings->associated_display_options));
 +
-+  // Views allows for multiple term ids, Drupal core does not. Check the class
-+  // of the display handler to pass Views an array of terms. All other display
-+  // plugins need to be passed a term object instead.
-+  if (get_class($associated_display) == 'TaxonomyDisplayAssociatedDisplayHandlerViews') {
++  // Drupal core does not allow for multiple term ids. Allow certain handlers to except multiple term ids.
++  // All other display plugins need to be passed a term object instead.
++  $allow_multiple_tids = array('TaxonomyDisplayAssociatedDisplayHandlerViews', 'TaxonomyDisplayAssociatedDisplayHandlerFunction')
++  if (in_array(get_class($associated_display), $allow_multiple_tids) {
 +    $build = array_merge($build, $associated_display->displayAssociated($terms, $display_settings->associated_display_options));
 +  }
 +  else {
