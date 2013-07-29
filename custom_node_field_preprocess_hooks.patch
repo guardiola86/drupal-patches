@@ -1,0 +1,31 @@
+diff --git a/modules/rdf/rdf.module b/modules/rdf/rdf.module
+index e491c31..d68ce84 100644
+--- a/modules/rdf/rdf.module
++++ b/modules/rdf/rdf.module
+@@ -464,6 +464,12 @@ function rdf_process(&$variables, $hook) {
+  * Implements MODULE_preprocess_HOOK().
+  */
+ function rdf_preprocess_node(&$variables) {
++  // If any module does not want to include rdf attibutes, exit.
++  foreach (module_implements('rdf_node_preprocess') as $module) {
++    if (!module_invoke($module, 'rdf_node_preprocess', $variables)) {
++      return;
++    }
++  }
+   // Adds RDFa markup to the node container. The about attribute specifies the
+   // URI of the resource described within the HTML element, while the @typeof
+   // attribute indicates its RDF type (e.g., foaf:Document, sioc:Person, and so
+@@ -548,6 +554,13 @@ function rdf_preprocess_node(&$variables) {
+  */
+ function rdf_preprocess_field(&$variables) {
+   $element = $variables['element'];
++  // If any module does not want to include rdf attibutes, exit.
++  foreach (module_implements('rdf_field_preprocess') as $module) {
++    if (!module_invoke($module, 'rdf_field_preprocess', $element)) {
++      return;
++    }
++  }
++
+   $mapping = rdf_mapping_load($element['#entity_type'], $element['#bundle']);
+   $field_name = $element['#field_name'];
+ 
