@@ -1,0 +1,55 @@
+diff --git a/dfp.admin.inc b/dfp.admin.inc
+index af14f2b..00db391 100644
+--- a/dfp.admin.inc
++++ b/dfp.admin.inc
+@@ -59,6 +59,17 @@ function dfp_admin_settings($form, $form_state) {
+     '#default_value' => variable_get('dfp_async_rendering', 1),
+     '#description' => t('This can speed up page rendering time by loading page content without waiting for ads to load.'),
+   );
++  $form['global_tag_settings']['dfp_disable_init_load'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Disable initial ad load'),
++    '#default_value' => variable_get('dfp_disable_init_load', 0),
++    '#description' => t('(Async mode only) Disables the initial fetch of ads from Google when the page is first loaded. Calls to refresh() can still be used to fetch ads.'),
++     '#states' => array(
++      'enabled' => array(
++        'input[name="dfp_async_rendering"]' => array('checked' => TRUE),
++      ),
++    ),
++  );
+   $form['global_tag_settings']['dfp_single_request'] = array(
+     '#type' => 'checkbox',
+     '#title' => t('Combine all ad requests into a single request'),
+diff --git a/dfp.module b/dfp.module
+index 242f7b3..5d12a6c 100644
+--- a/dfp.module
++++ b/dfp.module
+@@ -650,6 +650,9 @@ function _dfp_js_global_settings() {
+   $js .= 'googletag.cmd = googletag.cmd || [];';
+   $js .= variable_get('dfp_injected_js', '') . "\n";
+ 
++  // Add a place to store the slot name variable
++  $js .= 'googletag.slots = googletag.slots || {};';
++
+   $options = array(
+     'type' => 'inline',
+     'group' => JS_LIBRARY,
+@@ -681,6 +684,9 @@ function _dfp_js_global_settings() {
+   if (variable_get('dfp_collapse_empty_divs', 1)) {
+     $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
+   }
++  if (variable_get('dfp_disable_init_load', 0)) {
++    $js .= '  googletag.pubads().disableInitialLoad();' . "\n";
++  }
+ 
+   // Set global targeting values for this page.
+   $targeting = variable_get('dfp_targeting', array());
+@@ -711,7 +717,7 @@ function _dfp_js_global_settings() {
+  */
+ function _dfp_js_slot_definition($tag) {
+   // Add the js needed to define this adSlot to <head>.
+-  $js = 'googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
++  $js = 'googletag.slots.' . $tag->machinename . ' = googletag.defineSlot("' . $tag->adunit . '", ' . $tag->size . ', "' . $tag->placeholder_id . '")' . "\n";
+   $js .= '  .addService(googletag.pubads())' . "\n";
+ 
+   if (!empty($tag->adsense_ad_types)) {
