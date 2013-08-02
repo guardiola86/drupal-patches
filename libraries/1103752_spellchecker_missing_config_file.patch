@@ -1,6 +1,6 @@
 diff -rupN tinymce/jscripts/tiny_mce/plugins/spellchecker/config.php tinymce_patch/jscripts/tiny_mce/plugins/spellchecker/config.php
 --- tinymce/jscripts/tiny_mce/plugins/spellchecker/config.php	1970-01-01 01:00:00.000000000 +0100
-+++ tinymce_patch/jscripts/tiny_mce/plugins/spellchecker/config.php	2013-08-02 14:19:10.270270309 +0100
++++ tinymce/jscripts/tiny_mce/plugins/spellchecker/config.php	2013-08-02 14:19:10.270270309 +0100
 @@ -0,0 +1,27 @@
 +<?php
 +/**
