@@ -1,0 +1,31 @@
+diff -rupN dennis_distro_7_patch/profiles/dennis_distro/libraries/tinymce/jscripts/tiny_mce/plugins/spellchecker/config.php dennis_distro_7/profiles/dennis_distro/libraries/tinymce/jscripts/tiny_mce/plugins/spellchecker/config.php
+--- dennis_distro_7_patch/profiles/dennis_distro/libraries/tinymce/jscripts/tiny_mce/plugins/spellchecker/config.php	1970-01-01 01:00:00.000000000 +0100
++++ dennis_distro_7/profiles/dennis_distro/libraries/tinymce/jscripts/tiny_mce/plugins/spellchecker/config.php	2013-08-02 14:19:10.270270309 +0100
+@@ -0,0 +1,27 @@
++<?php
++/**
++* config.php
++*
++* @package MCManager.includes
++*/
++    // General settings
++    $config['general.engine'] = 'GoogleSpell';
++    //$config['general.engine'] = 'PSpell';
++    //$config['general.engine'] = 'PSpellShell';
++    //$config['general.remote_rpc_url'] = 'http://some.other.site/some/url/rpc.php';
++
++    // PSpell settings
++    $config['PSpell.mode'] = PSPELL_FAST;
++    $config['PSpell.spelling'] = "";
++    $config['PSpell.jargon'] = "";
++    $config['PSpell.encoding'] = "";
++
++    // PSpellShell settings
++    $config['PSpellShell.mode'] = PSPELL_FAST;
++    $config['PSpellShell.aspell'] = '/usr/bin/aspell';
++    $config['PSpellShell.tmp'] = '/tmp';
++
++    // Windows PSpellShell settings
++    //$config['PSpellShell.aspell'] = '"c:\Program Files\Aspell\bin\aspell.exe"';
++    //$config['PSpellShell.tmp'] = 'c:/temp';
++?>
