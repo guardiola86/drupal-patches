@@ -1,0 +1,36 @@
+diff --git a/dfp.admin.inc b/dfp.admin.inc
+index 00db391..12d6b16 100644
+--- a/dfp.admin.inc
++++ b/dfp.admin.inc
+@@ -128,6 +128,17 @@ function dfp_admin_settings($form, $form_state) {
+     '#title' => t('Hide ad slots if no ad is served'),
+     '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
+   );
++  $form['global_display_options']['dfp_collapse_empty_divs_initial'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Start with ad slots collapsed'),
++    '#default_value' => variable_get('dfp_collapse_empty_divs_initial', 0),
++    '#description' => t('Collapse all ad slots before the any ad is loaded. This is useful if ad slots will stay empty most of the time.'),
++     '#states' => array(
++      'visible' => array(
++        'input[name="dfp_collapse_empty_divs"]' => array('checked' => TRUE),
++      ),
++    ),
++  );
+ 
+   // Global targeting options.
+   $form['targeting_settings'] = array(
+diff --git a/dfp.module b/dfp.module
+index 39aa32e..b8e462f 100644
+--- a/dfp.module
++++ b/dfp.module
+@@ -666,7 +666,8 @@ function _dfp_js_global_settings() {
+     $js .= '  googletag.pubads().enableSingleRequest();' . "\n";
+   }
+   if (variable_get('dfp_collapse_empty_divs', 1)) {
+-    $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
++    $initial = variable_get('dfp_collapse_empty_divs_initial', 0) ? 'true' : '';
++    $js .= '  googletag.pubads().collapseEmptyDivs('. $initial .');' . "\n";
+   }
+   if (variable_get('dfp_disable_init_load', 0)) {
+     $js .= '  googletag.pubads().disableInitialLoad();' . "\n";
