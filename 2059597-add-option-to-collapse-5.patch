@@ -1,0 +1,69 @@
+diff --git a/dfp.admin.inc b/dfp.admin.inc
+index 00db391..9f5ed83 100644
+--- a/dfp.admin.inc
++++ b/dfp.admin.inc
+@@ -124,9 +124,15 @@ function dfp_admin_settings($form, $form_state) {
+     '#description' => t('Slug all ad tags with this label. Example: Advertisement', array('@tag' => '<none>')),
+   );
+   $form['global_display_options']['dfp_collapse_empty_divs'] = array(
+-    '#type' => 'checkbox',
+-    '#title' => t('Hide ad slots if no ad is served'),
++    '#type' => 'radios',
++    '#title' => t('Collapse empty divs'),
+     '#default_value' => variable_get('dfp_collapse_empty_divs', 1),
++    '#options' => array(
++      0 => t('Never'),
++      1 => t('Collapse only if no ad is served'),
++      2 => t('Expand only if an ad is served'),
++    ),
++    '#description' => t('<strong>Never:</strong> never collapse ad slots.<br/><strong>Collapse only:</strong> collapse before the any ad is loaded. Useful if ad slots will get filled most of the time.<br/><strong>Expand only:</strong> collapse all divs on the page before the browser fetches any ads and expand if an ad is loaded into the ad slot. Useful if ad slots will stay empty most of the time.'),
+   );
+ 
+   // Global targeting options.
+diff --git a/dfp.admin.js b/dfp.admin.js
+index 87dce2a..05f1ff8 100644
+--- a/dfp.admin.js
++++ b/dfp.admin.js
+@@ -36,10 +36,20 @@ Drupal.behaviors.dfpVerticalTabs = {
+     $('fieldset#edit-global-display-options', context).drupalSetSummary(function (context) {
+       var slug = Drupal.checkPlain($('#edit-dfp-default-slug', context).val());
+       var noscript = Drupal.checkPlain($('#edit-dfp-use-noscript', context).is(':checked'));
+-      var collapse = Drupal.checkPlain($('#edit-dfp-collapse-empty-divs', context).is(':checked'));
++      var collapse = Drupal.checkPlain($('input[name="dfp_collapse_empty_divs"]:checked', context).val());
+ 
+       summary = 'Global Slug: ' + slug + '<br/>';
+-      summary += (collapse == "true" ? checkmark : exmark) + ' Hide ad slots if no ad is served';
++      switch (collapse) {
++        case '0':
++          summary += exmark + ' Never collapse empty divs';
++          break;
++        case '1':
++          summary += checkmark + ' Collapse divs only if empty';
++          break;
++        case '2':
++          summary += checkmark + ' Expand divs only if non-empty';
++          break;
++      }
+ 
+       return summary;
+     });
+diff --git a/dfp.module b/dfp.module
+index 39aa32e..c9ccbe5 100644
+--- a/dfp.module
++++ b/dfp.module
+@@ -665,8 +665,13 @@ function _dfp_js_global_settings() {
+   if (variable_get('dfp_single_request', 1)) {
+     $js .= '  googletag.pubads().enableSingleRequest();' . "\n";
+   }
+-  if (variable_get('dfp_collapse_empty_divs', 1)) {
+-    $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
++  switch (variable_get('dfp_collapse_empty_divs', 1)) {
++    case 1:
++      $js .= '  googletag.pubads().collapseEmptyDivs();' . "\n";
++      break;
++    case 2:
++      $js .= '  googletag.pubads().collapseEmptyDivs(true);' . "\n";
++      break;
+   }
+   if (variable_get('dfp_disable_init_load', 0)) {
+     $js .= '  googletag.pubads().disableInitialLoad();' . "\n";
