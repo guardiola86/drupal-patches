@@ -1,6 +1,6 @@
-diff -urN /home/vagrant/store/media/js/media.js /home/vagrant/store/media-with-multiselect-on-library-patched/js/media.js
---- /home/vagrant/store/media/js/media.js	2013-09-09 15:29:17.778861898 +0100
-+++ /home/vagrant/store/media-with-multiselect-on-library-patched/js/media.js	2013-09-09 15:11:56.601861915 +0100
+diff --git a/js/media.js b/js/media.js
+--- a/js/media.js	2013-09-09 15:29:17.778861898 +0100
++++ b/js/media.js	2013-09-09 15:11:56.601861915 +0100
 @@ -33,7 +33,7 @@
        }
  
@@ -31,9 +31,9 @@ diff -urN /home/vagrant/store/media/js/media.js /home/vagrant/store/media-with-m
        });
  
        // Show or hide the edit/remove buttons if the field has a file or not.
-diff -urN /home/vagrant/store/media/js/plugins/media.views.js /home/vagrant/store/media-with-multiselect-on-library-patched/js/plugins/media.views.js
---- /home/vagrant/store/media/js/plugins/media.views.js	2013-09-09 15:29:17.780861898 +0100
-+++ /home/vagrant/store/media-with-multiselect-on-library-patched/js/plugins/media.views.js	2013-09-09 15:11:56.603861917 +0100
+diff --git a/js/plugins/media.views.js b/js/plugins/media.views.js
+--- a/js/plugins/media.views.js	2013-09-09 15:29:17.780861898 +0100
++++ b/js/plugins/media.views.js	2013-09-09 15:11:56.603861917 +0100
 @@ -7,6 +7,7 @@
  
  (function ($) {
@@ -166,9 +166,9 @@ diff -urN /home/vagrant/store/media/js/plugins/media.views.js /home/vagrant/stor
 +}
 +
  }(jQuery));
-diff -urN /home/vagrant/store/media/media.views.inc /home/vagrant/store/media-with-multiselect-on-library-patched/media.views.inc
---- /home/vagrant/store/media/media.views.inc	2013-09-09 15:29:17.790861898 +0100
-+++ /home/vagrant/store/media-with-multiselect-on-library-patched/media.views.inc	2013-09-09 15:11:56.636861918 +0100
+diff --git a/media.views.inc b/media.views.inc
+--- a/media.views.inc	2013-09-09 15:29:17.790861898 +0100
++++ b/media.views.inc	2013-09-09 15:11:56.636861918 +0100
 @@ -70,6 +70,20 @@
    // Add the files to JS so that they are accessible inside the browser
    drupal_add_js(array('media' => array('files' => array_values($files))), 'setting');
