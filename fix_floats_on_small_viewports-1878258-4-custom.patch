@@ -1,0 +1,107 @@
+diff --git a/floating_block.info b/floating_block.info
+index 497c4a4..664adfe 100755
+--- a/floating_block.info
++++ b/floating_block.info
+@@ -5,3 +5,10 @@ core = 7.x
+ configure = admin/config/user-interface/floating-block
+ files[] = floating_block.module
+ files[] = tests/floating_block.test
++
++; Information added by drupal.org packaging script on 2012-12-31
++version = "7.x-1.2"
++core = "7.x"
++project = "floating_block"
++datestamp = "1356956848"
++
+diff --git a/floating_block.js b/floating_block.js
+index 3c58340..96b3c90 100644
+--- a/floating_block.js
++++ b/floating_block.js
+@@ -39,7 +39,8 @@ Drupal.behaviors.blockFloat = {
+       // not to float outside of.
+       $(selector.toString() + ':not(.blockFloat-processed)', context).each(function (j, block) {
+         // Store information about the block to float.
+-        var blockInfo = [];
++        var blockInfo = [],
++          $this = $(this);
+         blockInfo.original_css = [];
+         blockInfo.original_css.left = Drupal.blockFloatCleanCSSValue($(block).css('left'));
+         blockInfo.original_css.top = Drupal.blockFloatCleanCSSValue($(block).css('top'));
+@@ -48,6 +49,10 @@ Drupal.behaviors.blockFloat = {
+         blockInfo.reset = true;
+         blockInfo.original_identifier = 'blockFloat-' +  Drupal.blockFloatStack().length;
+ 
++        // Store element dimensions in blockInfo for better performance.
++        blockInfo.blockWidth = $this.width();
++        blockInfo.blockHeight = $this.height();
++
+         // Store the selector for the container if it exists.
+         if (setting.container && $(setting.container.toString()).length > 0) {
+           blockInfo.container = setting.container;
+@@ -100,6 +105,33 @@ Drupal.blockFloatTracker = function (blockInfo) {
+     return;
+   }
+ 
++  // Do not float if the sibling container is smaller than the block's container.
++  var contentRegion = $('#content'),
++      sidebarRegion = $('#sidebar-second');
++  if (contentRegion.height() < sidebarRegion.height()) {
++    return;
++  }
++
++  var documentWidth = $(document).width(),
++      // Window width calculation involves scrollbar calculation on IE.
++      viewportWidth = ($.browser.msie) ? $(window).width() + $.getScrollbarWidth() : $(window).width(),
++      viewportHeight = $(window).height(),
++      trueBlockHeight = parseInt(blockInfo.blockHeight) + parseInt(blockInfo.padding_top) + parseInt(blockInfo.padding_bottom);
++
++  // Do not float if the block to be floated is taller than the viewport itself.
++  if (trueBlockHeight > viewportHeight) {
++    // Reset the block in case it was caught floating during viewport change.
++    // console.log('block is taller than viewport');
++    Drupal.blockFloatResetPosition(block, blockInfo);
++    return;
++  }
++  // Do not float if the viewport is not wide enough to hold the page.
++  if (documentWidth > viewportWidth) {
++    // console.log('document is wider than the viewport');
++    Drupal.blockFloatResetPosition(block, blockInfo);
++    return;
++  }
++
+   // (Re)calculate some values if necessary.
+   if (blockInfo.scrollHeight != scrollHeight || blockInfo.reset) {
+     if (blockInfo.reset) {
+@@ -225,4 +257,32 @@ if (!$('body').hasClass('blockFloat-processed')) {
+   $(window).resize(Drupal.blockFloatWindowResize);
+ }
+ 
++/**
++ * Calculate the size of the scrollbar as IE does not include this size when
++ * returning the width of the window object.
++ * Taken from https://github.com/brandonaaron/jquery-getscrollbarwidth/blob/master/jquery.getscrollbarwidth.js
++ */
++$.getScrollbarWidth = function() {
++  var scrollbarWidth = 0;
++
++  if (!scrollbarWidth) {
++    if ($.browser.msie) {
++      var $textarea1 = $('<textarea cols="10" rows="2"></textarea>')
++      .css({ position: 'absolute', top: -1000, left: -1000 }).appendTo('body'),
++      $textarea2 = $('<textarea cols="10" rows="2" style="overflow: hidden;"></textarea>')
++      .css({ position: 'absolute', top: -1000, left: -1000 }).appendTo('body');
++      scrollbarWidth = $textarea1.width() - $textarea2.width();
++      $textarea1.add($textarea2).remove();
++    } else {
++      var $div = $('<div />')
++      .css({ width: 100, height: 100, overflow: 'auto', position: 'absolute', top: -1000, left: -1000 })
++      .prependTo('body').append('<div />').find('div')
++      .css({ width: '100%', height: 200 });
++      scrollbarWidth = 100 - $div.width();
++      $div.parent().remove();
++    }
++  }
++  return scrollbarWidth;
++};
++
+ })(jQuery);
