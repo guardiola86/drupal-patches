@@ -1,5 +1,5 @@
 diff --git a/smart_paging.module b/smart_paging.module
-index 4c53821..3a923c5 100644
+index 4c53821..6e76d00 100644
 --- a/smart_paging.module
 +++ b/smart_paging.module
 @@ -869,15 +869,21 @@ function smart_paging_field_attach_view_alter(&$build, $context) {
@@ -48,12 +48,13 @@ index 4c53821..3a923c5 100644
 +    $metatags = array();
 +    $output_metatags = array();
 +    $options['instance'] = $instance;
++    $node = menu_get_object();
 +    // Rearrange the array so that we can use metatag module classes.
 +    foreach ($page_metatags as $metatag => $value) {
 +      if (isset($value) && !empty($value)) {
 +        $target_tag = explode('_', $metatag);
 +        if (isset($target_tag[0]) && isset($target_tag[1]) && isset($target_tag[2]) && isset($target_tag[3])) {
-+          $metatags[$target_tag[2]] = array('value' => token_replace($value));
++          $metatags[$target_tag[2]] = array('value' => token_replace($value, array('node' => $node)));
 +        }
 +      }
 +    }
@@ -68,4 +69,3 @@ index 4c53821..3a923c5 100644
 +    $output = array_merge($output, $output_metatags);
 +  }
 +}
-+
