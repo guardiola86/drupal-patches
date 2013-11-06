@@ -1,0 +1,78 @@
+diff --git a/custom_breadcrumbs.module b/custom_breadcrumbs.module
+index ab7d638..2861003 100644
+--- a/custom_breadcrumbs.module
++++ b/custom_breadcrumbs.module
+@@ -92,10 +92,10 @@ function custom_breadcrumbs_menu() {
+  */
+ function custom_breadcrumbs_permission() {
+   return array('administer custom breadcrumbs' => array(
+-                 'title' => 'Administer Custom Breadcrumbs', 
++                 'title' => 'Administer Custom Breadcrumbs',
+                  'description' => 'Configure the Custom Breadcrumbs Modules'),
+                'use php in custom breadcrumbs' => array(
+-                 'title' => 'Use PHP in Custom Breadcrumbs', 
++                 'title' => 'Use PHP in Custom Breadcrumbs',
+                  'description' => 'Control Breadcrumb Visibility with PHP code'),
+               );
+ }
+@@ -115,7 +115,9 @@ function custom_breadcrumbs_node_view($node, $build_mode) {
+     $titles = preg_split("/[\n]+/", $breadcrumb->titles);
+     $paths = preg_split("/[\n]+/", $breadcrumb->paths);
+ 
+-    $trail = array(l(t('Home'), '<front>'));
++    $crumb_item = array('title' => t('Home'), 'original_path' => '<front>', 'path' => NULL, 'options' => array());
++    drupal_alter('custom_breadcrumbs_crumb', $crumb_item);
++    $trail = array(l($crumb_item['title'], $crumb_item['original_path'], $crumb_item['options']));
+     for ($i = 0; $i < count($titles); $i++) {
+       $data = array('node' => $node);
+       $title = token_replace(trim($titles[$i]), $data, array('clear'=>TRUE));
+@@ -225,27 +227,32 @@ function _custom_breadcrumbs_create_crumb($title, $original_path) {
+   $original_path = preg_replace('/\/+/', '/', $original_path);
+   // Removing leading and trailing slashes.
+   $original_path = preg_replace('/^\/|\/+$/', '', $original_path);
++  // Build crumb data array.
++  $crumb_item = array('title' => $title, 'original_path' => $original_path, 'path' => NULL, 'options' => array());
+   // Supress "Undefined Offset" error.
+-  @list($identifier, $path) = explode("|", $original_path, 2);
++  @list($identifier, $crumb_item['path']) = explode("|", $original_path, 2);
+ 
+-  if ($path) {
++  if ($crumb_item['path']) {
+     switch ($identifier) {
+       case '<pathauto>':
+         if (module_exists('pathauto')) {
+           module_load_include('inc', 'pathauto', 'pathauto');
+-          $patharray = explode('/', $path);
++          $patharray = explode('/', $crumb_item['path']);
+           foreach ($patharray as $k => $v) {
+             $patharray[$k] = pathauto_cleanstring($v);
+           }
+-          $path = implode('/', $patharray);
+-          $crumb = l($title, $path);
++          $crumb_item['path'] = implode('/', $patharray);
++          drupal_alter('custom_breadcrumbs_crumb', $crumb_item);
++          $crumb = l($crumb_item['title'], $crumb_item['path'], $crumb_item['options']);
+         }
+         else {
+-          $crumb = l($title, $path);
++          drupal_alter('custom_breadcrumbs_crumb', $crumb_item);
++          $crumb = l($crumb_item['title'], $crumb_item['path'], $crumb_item['options']);
+         }
+         break;
+       default:
+-        $crumb = l($title, $original_path);
++        drupal_alter('custom_breadcrumbs_crumb', $crumb_item);
++        $crumb = l($crumb_item['title'], $crumb_item['original_path'], $crumb_item['options']);
+     }
+   }
+   else {
+@@ -255,7 +262,8 @@ function _custom_breadcrumbs_create_crumb($title, $original_path) {
+         $crumb = check_plain($title);
+         break;
+       default:
+-        $crumb = l($title, $original_path);
++        drupal_alter('custom_breadcrumbs_crumb', $crumb_item);
++        $crumb = l($crumb_item['title'], $crumb_item['original_path'], $crumb_item['options']);
+     }
+   }
+ 
