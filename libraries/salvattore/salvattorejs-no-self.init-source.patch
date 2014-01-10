@@ -1,13 +1,13 @@
-diff --git a/dist/salvattore.js b/dist/salvattore.js
-index d547557..a97a724 100644
---- a/dist/salvattore.js
-+++ b/dist/salvattore.js
-@@ -612,12 +612,12 @@ self.init = function init() {
+diff --git a/src/salvattore.js b/src/salvattore.js
+index 2f7607e..7eaf9d5 100644
+--- a/src/salvattore.js
++++ b/src/salvattore.js
+@@ -337,12 +337,11 @@ self.init = function init() {
  };
  
  
 -self.init();
- 
+-
  return {
    append_elements: self.append_elements,
    prepend_elements: self.prepend_elements,
