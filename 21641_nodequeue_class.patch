@@ -1,0 +1,13 @@
+diff --git a/includes/nodequeue.admin.inc b/includes/nodequeue.admin.inc
+index ccb68df..8698961 100644
+--- a/includes/nodequeue.admin.inc
++++ b/includes/nodequeue.admin.inc
+@@ -193,7 +193,7 @@ function nodequeue_node_tab($node) {
+       'class' => array('nodequeue-in-queue'),
+       'data' => nodequeue_subqueue_size_text($queue->size, $subqueue->count, FALSE)
+     );
+-    $row[] = array('class' => array('nodequeue-operation'), 'data' => $op);
++    $row[] = array('class' => array('nodequeue-operation qid_' . $queue->qid), 'data' => $op);
+     $rows[] = $row;
+   }
+ 
