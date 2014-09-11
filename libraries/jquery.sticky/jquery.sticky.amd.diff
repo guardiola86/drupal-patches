@@ -1,0 +1,28 @@
+diff --git a/jquery.sticky.js b/jquery.sticky.js
+index f7c9cd4..552f439 100644
+--- a/jquery.sticky.js
++++ b/jquery.sticky.js
+@@ -10,7 +10,7 @@
+ //       It will only set the 'top' and 'position' of your element, you
+ //       might need to adjust the width in some cases.
+ 
+-(function($) {
++define(['jquery'], function($){
+   var defaults = {
+       topSpacing: 0,
+       bottomSpacing: 0,
+@@ -84,7 +84,7 @@
+           var stickyElement = $(this);
+ 
+           var stickyId = stickyElement.attr('id');
+-          var wrapperId = stickyId ? stickyId + '-' + defaults.wrapperClassName : defaults.wrapperClassName 
++          var wrapperId = stickyId ? stickyId + '-' + defaults.wrapperClassName : defaults.wrapperClassName
+           var wrapper = $('<div></div>')
+             .attr('id', stickyId + '-sticky-wrapper')
+             .addClass(o.wrapperClassName);
+@@ -167,4 +167,4 @@
+   $(function() {
+     setTimeout(scroller, 0);
+   });
+-})(jQuery);
++});
