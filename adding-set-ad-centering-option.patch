@@ -1,0 +1,31 @@
+diff --git a/dfp.admin.inc b/dfp.admin.inc
+index a5f1efa..bcf6273 100644
+--- a/dfp.admin.inc
++++ b/dfp.admin.inc
+@@ -119,6 +119,12 @@ function dfp_admin_settings($form, $form_state) {
+       ),
+     ),
+   );
++  $form['global_tag_settings']['dfp_set_centering'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Set DFP Ad Centering'),
++    '#default_value' => variable_get('dfp_set_centering', 0),
++    '#description' => t('Enables/disables centering of ads. This mode must be set before the service is enabled. Centering is disabled by default. In legacy gpt_mobile.js, centering is enabled by default.'),
++  );
+ 
+   // Global display options.
+   $form['global_display_options'] = array(
+diff --git a/dfp.module b/dfp.module
+index 607b6a3..7dbc558 100644
+--- a/dfp.module
++++ b/dfp.module
+@@ -693,6 +693,9 @@ function _dfp_js_global_settings() {
+   if (variable_get('dfp_disable_init_load', 0)) {
+     $js .= '  googletag.pubads().disableInitialLoad();' . "\n";
+   }
++  if (variable_get('dfp_set_centering', 0)) {
++    $js .= '  googletag.pubads().setCentering(true);' . "\n";
++  }
+ 
+   // Set global targeting values for this page.
+   $targeting = variable_get('dfp_targeting', array());
