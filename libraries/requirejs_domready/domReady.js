@@ -1,5 +1,7 @@
 /**
  * @file
+ * RequireJS domReady 2.0.1-dummy
+ *
  * This is a dummy replacement for the requirejs domReady plugin to retain
  * backwards compatibility with older applications.
  *
