@@ -1,0 +1,15 @@
+diff --git a/disqus.module b/disqus.module
+index c032428..a2311ae 100644
+--- a/disqus.module
++++ b/disqus.module
+@@ -119,6 +119,10 @@ function disqus_element_post_render($children, &$element) {
+     'title' => $element['#disqus']['title'],
+     'identifier' => $element['#disqus']['identifier'],
+   );
++
++  // Allow other modules to rewrite Disqus parameters.
++  drupal_alter('change_disqus_thread', $disqus);
++
+   if (isset($element['#disqus']['developer']) && $element['#disqus']['developer']) {
+     $disqus['developer'] = 1;
+   }
