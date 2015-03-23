@@ -1,0 +1,114 @@
+diff --git a/disqus_ga/disqus_ga.info b/disqus_ga/disqus_ga.info
+new file mode 100644
+index 0000000..c78e080
+--- /dev/null
++++ b/disqus_ga/disqus_ga.info
+@@ -0,0 +1,7 @@
++name = Disqus Google Analytics
++description = Track new comments in Google Analytics.
++core = 7.x
++php = 5
++
++dependencies[] = disqus
++dependencies[] = googleanalytics
+\ No newline at end of file
+diff --git a/disqus_ga/disqus_ga.js b/disqus_ga/disqus_ga.js
+new file mode 100644
+index 0000000..9d5fcf5
+--- /dev/null
++++ b/disqus_ga/disqus_ga.js
+@@ -0,0 +1,37 @@
++/**
++ * @file
++ * JavaScript for the Disqus Google Analytics module.
++ */
++
++(function($) {
++
++  /**
++   * Track new comments in Google analytics.
++   * Custom modules can override this by implementing hook_js_alter().
++   */
++  disqusTrackNewComment = function() {
++
++    // Make sure that the google analytics event tracking object or
++    // the universal analytics tracking function exists
++    // if not then exit and don't track.
++    if (typeof _gaq == "undefined" && typeof ga == "undefined") {
++      return;
++    }
++
++    // Construct current page relative URL to be used as event Label.
++    var label = document.location.href.toLowerCase().substring((document.location.href.toLowerCase().indexOf(document.domain.toLowerCase())) + (document.domain.toLowerCase().length));
++
++    if (typeof _gaq != 'undefined') {
++      _gaq.push(['_trackEvent', 'Disqus', 'Comment', label]);
++    }
++    else {
++      ga('send', {
++        'hitType': 'event',
++        'eventCategory': 'Disqus',
++        'eventAction': 'Comment',
++        'eventLabel': label
++      });
++    }
++  };
++
++})(jQuery);
+\ No newline at end of file
+diff --git a/disqus_ga/disqus_ga.module b/disqus_ga/disqus_ga.module
+new file mode 100644
+index 0000000..e1cd99f
+--- /dev/null
++++ b/disqus_ga/disqus_ga.module
+@@ -0,0 +1,50 @@
++<?php
++
++/**
++ * @file
++ * Sends tracking information to Google Analytics on new comments.
++ *
++ * If you want to send some other function, or want to alter disqus_ga.js,
++ * you may override it in your custom module using hook_js_alter().
++ */
++
++/**
++ * Implements hook_form_FORM_ID_alter().
++ */
++function disqus_ga_form_disqus_admin_settings_alter(&$form, &$form_state, $form_id) {
++  $form['behavior']['disqus_track_newcomment_ga'] = array(
++      '#type' => 'checkbox',
++      '#title' => t('Track new comments in Google Analytics'),
++      '#description' => t('When enabled, sends tracking information to Google Analytics.'),
++      '#default_value' => variable_get('disqus_track_newcomment_ga', FALSE),
++  );
++}
++
++/**
++ * Implements hook_ga_element_info_alter().
++ *
++ * @param unknown_type $type
++ */
++function disqus_ga_element_info_alter(&$type) {
++  if (isset($type['disqus']) && variable_get('disqus_track_newcomment_ga', FALSE)) {
++    // This post render needs to happen before 'disqus_element_post_render'.
++    array_unshift($type['disqus']['#post_render'], 'disqus_ga_element_post_render');
++  }
++}
++
++/**
++ * Post render function of the Disqus element to add an 'onNewComment' callback.
++ *
++ * @param unknown_type $children
++ * @param unknown_type $element
++ */
++function disqus_ga_element_post_render($children, &$element) {
++  if (variable_get('disqus_track_newcomment_ga', FALSE)) {
++    // Add a callback when a new comment is posted.
++    $element['#disqus']['callbacks']['onNewComment'][] = 'disqusTrackNewComment';
++    // Attach the js with the callback implementation.
++    $element['#attached']['js'][] = drupal_get_path('module', 'disqus_ga') . '/disqus_ga.js';
++  }
++
++  return $children;
++}
