@@ -1,0 +1,278 @@
+diff --git a/disqus.admin.inc b/disqus.admin.inc
+index 74cf029..ae3a677 100644
+--- a/disqus.admin.inc
++++ b/disqus.admin.inc
+@@ -210,6 +210,45 @@ function disqus_admin_settings() {
+       ),
+     ),
+   );
++  $form['advanced']['lazy_loading'] = array(
++    '#weight' => 6,
++    '#type' => 'fieldset',
++    '#title' => t('Lazy Loading'),
++    '#collapsible' => FALSE,
++    '#collapsed' => FALSE,
++  );
++  $form['advanced']['lazy_loading']['disqus_lazy_load'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Use Lazy Loading'),
++    '#description' => t('Prevent the Disqus script from loading until triggered by user activity.'),
++    '#default_value' => variable_get('disqus_lazy_load', 0),
++  );
++  $form['advanced']['lazy_loading']['disqus_lazy_load_method'] = array(
++    '#type' => 'select',
++    '#title' => t('Lazy Loading Trigger'),
++    '#description' => t('The type of user activity used to determine when the Disqus script is loaded.'),
++    '#default_value' => variable_get('disqus_lazy_load_method', DISQUS_LAZY_LOAD_ON_SCROLL),
++    '#options' => array(
++      DISQUS_LAZY_LOAD_ON_SCROLL => t('When the Disqus block scrolls into view'),
++      DISQUS_LAZY_LOAD_ON_CLICK => t('When the user clicks on an HTML element'),
++    ),
++    '#states' => array(
++      'visible' => array(
++        'input[name="disqus_lazy_load"]' => array('checked' => TRUE),
++      ),
++    ),
++  );
++  $form['advanced']['lazy_loading']['disqus_lazy_load_class'] = array(
++    '#type' => 'textfield',
++    '#title' => t('Triggering Class'),
++    '#description' => t('The HTML class of the elements that trigger the lazy loading.'),
++    '#default_value' => variable_get('disqus_lazy_load_class', 'disqus-lazy-load'),
++    '#states' => array(
++      'visible' => array(
++        'select[name="disqus_lazy_load_method"]' => array('value' => DISQUS_LAZY_LOAD_ON_CLICK),
++      ),
++    ),
++  );
+ 
+   // Make sure the validation is called to handle the custom sso logo.
+   $form['#submit'][] = 'disqus_admin_settings_submit';
+diff --git a/disqus.install b/disqus.install
+index e4eeb37..cca05c3 100644
+--- a/disqus.install
++++ b/disqus.install
+@@ -51,6 +51,9 @@ function disqus_uninstall() {
+     'disqus_developer',
+     'disqus_domain',
+     'disqus_inherit_login',
++    'disqus_lazy_load',
++    'disqus_lazy_load_class',
++    'disqus_lazy_load_method',
+     'disqus_localization',
+     'disqus_location',
+     'disqus_logo',
+diff --git a/disqus.js b/disqus.js
+index 7332e3f..1dce7c2 100644
+--- a/disqus.js
++++ b/disqus.js
+@@ -15,11 +15,32 @@ var disqus_config;
+ 
+ (function ($) {
+ 
++Drupal.disqus = {
++  loadCommentScript: function (shortname) {
++    // Make the AJAX call to get the Disqus comments.
++    this.loadScript(shortname, 'embed.js')
++  },
++  loadCountScript: function (shortname) {
++    // Make the AJAX call to get the number of comments.
++    this.loadScript(shortname, 'count.js');
++  },
++  loadScript: function (shortname, scriptName) {
++    $.ajax({
++      type: 'GET',
++      url: '//' + shortname + '.disqus.com/' + scriptName,
++      dataType: 'script',
++      cache: false
++    });
++  }
++};
++
+ /**
+  * Drupal Disqus behavior.
+  */
+ Drupal.behaviors.disqus = {
+   attach: function (context, settings) {
++    var disqus = Drupal.disqus;
++
+     $('body').once('disqus', function() {
+       // Load the Disqus comments.
+       if (settings.disqus || false) {
+@@ -54,7 +75,7 @@ Drupal.behaviors.disqus = {
+                 for (var j = 0; j < callback.length; j++) {
+                   fn = fn[callback[j]];
+                 }
+-                if(typeof fn === 'function') {
++                if (typeof fn === 'function') {
+                   this.callbacks[key].push(fn);
+                 }
+               }
+@@ -63,24 +84,34 @@ Drupal.behaviors.disqus = {
+         };
+ 
+         // Make the AJAX call to get the Disqus comments.
+-        jQuery.ajax({
+-          type: 'GET',
+-          url: '//' + disqus_shortname + '.disqus.com/embed.js',
+-          dataType: 'script',
+-          cache: false
+-        });
++        if (settings.disqus.lazyLoadMethod || '') {
++          switch (settings.disqus.lazyLoadMethod) {
++            case 'click':
++              $('.' + (settings.disqus.lazyLoadClass || ''))
++                .css('cursor', 'pointer')
++                .bind('click', function (event) {
++                  $(event.currentTarget).remove();
++                  disqus.loadCommentScript(disqus_shortname);
++                });
++              break;
++            case 'scroll':
++              $(window).scroll(function scrollHandler(event) {
++                if ($(window).scrollTop() + $(window).height() > $('#disqus_thread').offset().top) {
++                  disqus.loadCommentScript(disqus_shortname);
++                  $(window).unbind('scroll', scrollHandler);
++                }
++              });
++              break;
++          }
++        }
++        else {
++          disqus.loadCommentScript(disqus_shortname);
++        }
+       }
+ 
+       // Load the comment numbers JavaScript.
+       if (settings.disqusComments || false) {
+-        disqus_shortname = settings.disqusComments;
+-        // Make the AJAX call to get the number of comments.
+-        jQuery.ajax({
+-          type: 'GET',
+-          url: '//' + disqus_shortname + '.disqus.com/count.js',
+-          dataType: 'script',
+-          cache: false
+-        });
++        disqus.loadCountScript(settings.disqusComments);
+       }
+     });
+   }
+diff --git a/disqus.module b/disqus.module
+index 14abee7..602ec78 100644
+--- a/disqus.module
++++ b/disqus.module
+@@ -21,6 +21,16 @@ define('DISQUS_API_CLOSE', 1);
+ define('DISQUS_API_REMOVE', 2);
+ 
+ /**
++ * Lazy load the Disqus script when the Disqus comment block becomes visible.
++ */
++define('DISQUS_LAZY_LOAD_ON_SCROLL', 0);
++
++/**
++ * Lazy load the Disqus script when an element is clicked.
++ */
++define('DISQUS_LAZY_LOAD_ON_CLICK', 1);
++
++/**
+  * Implements hook_help().
+  */
+ function disqus_help($path, $arg) {
+@@ -101,7 +111,7 @@ function disqus_closewindow() {
+ function disqus_element_info() {
+   $types['disqus'] = array(
+     '#disqus' => array(),
+-    '#theme_wrappers' => array('disqus_noscript', 'container'),
++   '#theme_wrappers' => array('disqus_noscript', 'disqus_lazy_load', 'container'),
+     '#attributes' => array('id' => 'disqus_thread'),
+     '#post_render' => array('disqus_element_post_render'),
+   );
+@@ -144,6 +154,10 @@ function disqus_element_post_render($children, &$element) {
+     $disqus += disqus_sso_disqus_settings($user);
+   }
+ 
++  if (variable_get('disqus_lazy_load', FALSE)) {
++    $disqus += disqus_lazy_load_settings();
++  }
++
+   /**
+    * Pass callbacks on if needed. Callbacks array is two dimensional array
+    * with callback type as key on first level and array of JS callbacks on the
+@@ -795,6 +809,9 @@ function disqus_theme() {
+     'disqus_noscript' => array(
+       'variables' => array('disqus' => NULL),
+     ),
++    'disqus_lazy_load' => array(
++      'variables' => array('children' => NULL),
++    ),
+   );
+ }
+ 
+@@ -815,6 +832,24 @@ function theme_disqus_noscript($variables = array()) {
+ }
+ 
+ /**
++ * Prepares the comment load prompt when lazy loading is enabled.
++ *
++ * @param $variables
++ *   An array containing a "children" element, which may contain
++ *   rendered content.
++ *
++ * @return string
++ */
++function theme_disqus_lazy_load($variables) {
++  if (variable_get('disqus_lazy_load', FALSE) && variable_get('disqus_lazy_load_method', '') == DISQUS_LAZY_LOAD_ON_CLICK) {
++    return '<p class="disqus-lazy-load">' . t('View the discussion thread.') . '</p>' . $variables['children'];
++  }
++  else {
++    return $variables['children'];
++  }
++}
++
++/**
+  * Implements hook_libraries_info().
+  */
+ function disqus_libraries_info() {
+@@ -958,6 +993,14 @@ function disqus_variable_info($options) {
+         'default' => '',
+         'group' => 'disqus'
+     );
++    $variable['disqus_lazy_load'] = array(
++        'type' => 'string',
++        'title' => t('Lazy Load'),
++        'description' => t('Prevent the Disqus script from loading until triggered by user activity.'),
++        'default' => '',
++        'group' => 'disqus'
++    );
++
+     return $variable;
+ }
+ 
+@@ -1022,6 +1065,27 @@ function disqus_sso_disqus_settings($account = NULL) {
+ }
+ 
+ /**
++ * Assembles data about lazy loading.
++ *
++ * @return array
++ */
++function disqus_lazy_load_settings() {
++  $data = array();
++
++  switch (variable_get('disqus_lazy_load_method', NULL)) {
++    case DISQUS_LAZY_LOAD_ON_SCROLL:
++      $data['lazyLoadMethod'] = 'scroll';
++      break;
++    case DISQUS_LAZY_LOAD_ON_CLICK:
++      $data['lazyLoadClass'] = check_plain(variable_get('disqus_lazy_load_class', 'disqus-lazy-load'));
++      $data['lazyLoadMethod'] = 'click';
++      break;
++  }
++
++  return $data;
++}
++
++/**
+  * Assembles the full private key for use in SSO authentication.
+  *
+  * @param array $data
