@@ -1,8 +1,8 @@
 diff --git a/disqus.admin.inc b/disqus.admin.inc
-index 74cf029..ae3a677 100644
+index 94a2346..2a1016b 100644
 --- a/disqus.admin.inc
 +++ b/disqus.admin.inc
-@@ -210,6 +210,45 @@ function disqus_admin_settings() {
+@@ -195,6 +195,45 @@ function disqus_admin_settings() {
        ),
      ),
    );
@@ -45,9 +45,9 @@ index 74cf029..ae3a677 100644
 +      ),
 +    ),
 +  );
- 
    // Make sure the validation is called to handle the custom sso logo.
    $form['#submit'][] = 'disqus_admin_settings_submit';
+   return system_settings_form($form);
 diff --git a/disqus.install b/disqus.install
 index e4eeb37..cca05c3 100644
 --- a/disqus.install
@@ -158,7 +158,7 @@ index 7332e3f..1dce7c2 100644
      });
    }
 diff --git a/disqus.module b/disqus.module
-index 14abee7..602ec78 100644
+index 2b80720..4bf61ba 100644
 --- a/disqus.module
 +++ b/disqus.module
 @@ -21,6 +21,16 @@ define('DISQUS_API_CLOSE', 1);
@@ -198,7 +198,7 @@ index 14abee7..602ec78 100644
    /**
     * Pass callbacks on if needed. Callbacks array is two dimensional array
     * with callback type as key on first level and array of JS callbacks on the
-@@ -795,6 +809,9 @@ function disqus_theme() {
+@@ -759,6 +773,9 @@ function disqus_theme() {
      'disqus_noscript' => array(
        'variables' => array('disqus' => NULL),
      ),
@@ -208,7 +208,7 @@ index 14abee7..602ec78 100644
    );
  }
  
-@@ -815,6 +832,24 @@ function theme_disqus_noscript($variables = array()) {
+@@ -779,6 +796,24 @@ function theme_disqus_noscript($variables = array()) {
  }
  
  /**
@@ -233,7 +233,7 @@ index 14abee7..602ec78 100644
   * Implements hook_libraries_info().
   */
  function disqus_libraries_info() {
-@@ -958,6 +993,14 @@ function disqus_variable_info($options) {
+@@ -922,6 +957,14 @@ function disqus_variable_info($options) {
          'default' => '',
          'group' => 'disqus'
      );
@@ -248,7 +248,7 @@ index 14abee7..602ec78 100644
      return $variable;
  }
  
-@@ -1022,6 +1065,27 @@ function disqus_sso_disqus_settings($account = NULL) {
+@@ -986,6 +1029,27 @@ function disqus_sso_disqus_settings($account = NULL) {
  }
  
  /**
