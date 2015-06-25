@@ -1,0 +1,104 @@
+diff --git a/quantcast.module b/quantcast.module
+index 6293790..0f8eaf3 100644
+--- a/quantcast.module
++++ b/quantcast.module
+@@ -113,6 +113,7 @@ function quantcast_page_build(&$page) {
+     $scope = variable_get('quantcast_js_scope', 'page_bottom');
+     $vars = array(
+       'pcode' => variable_get('quantcast_account', ''),
++      'uid' => md5($user->uid),
+     );
+     if ($scope == 'split') {
+       $head = array(
+diff --git a/theme/quantcast-tag-body.tpl.php b/theme/quantcast-tag-body.tpl.php
+index 59867db..2a10076 100644
+--- a/theme/quantcast-tag-body.tpl.php
++++ b/theme/quantcast-tag-body.tpl.php
+@@ -1,8 +1,11 @@
+-<script type="text/javascript">
+-<!--//--><![CDATA[//><!--
+-  _qevents.push({qacct:"<?php print $vars['pcode']; ?>"});
+-//--><!]]>
++
++ <script>
++ <!--//--><![CDATA[//><!--
++
++  var qcdata = {qacct: '<?php print $vars['pcode']; ?>',
++                uid: '<?php print $vars['uid']; ?>'};
++ //--><!]]>
+ </script>
+ <noscript>
+-  <div style="display:none;"><img src="//pixel.quantserve.com/pixel/<?php print $vars['pcode']; ?>.gif" border="0" height="1" width="1" alt="Quantcast"/></div>
++  <img src="//pixel.quantserve.com/pixel/<?php print $vars['pcode']; ?>.gif?labels=_fp.event.Default" style="display: none;" border="0" height="1" width="1" alt="Quantcast"/>
+ </noscript>
+diff --git a/theme/quantcast-tag-full.tpl.php b/theme/quantcast-tag-full.tpl.php
+index 34b7230..3316440 100644
+--- a/theme/quantcast-tag-full.tpl.php
++++ b/theme/quantcast-tag-full.tpl.php
+@@ -1,17 +1,20 @@
+-<script type="text/javascript">
+-<!--//--><![CDATA[//><!--
+-  var _qevents = _qevents || [];
+-  (function() {
+-    var elem = document.createElement('script');
+-    elem.src = (document.location.protocol == "https:" ? "https://secure" : "http://edge") + ".quantserve.com/quant.js";
+-    elem.async = true;
+-    elem.type = "text/javascript";
+-    var scpt = document.getElementsByTagName('script')[0];
+-    scpt.parentNode.insertBefore(elem, scpt);
+-  })();
+-  _qevents.push({qacct:"<?php print $vars['pcode']; ?>"});
+-//--><!]]>
++
++ <script>
++ <!--//--><![CDATA[//><!--
++  qcdata = {} || qcdata;
++  (function(){
++     var elem = document.createElement('script');
++     elem.src = (document.location.protocol == "https:" ? "https://secure" : "http://pixel") + ".quantserve.com/aquant.js?a=<?php print $vars['pcode']; ?>";
++     elem.async = true;
++     elem.type = "text/javascript";
++     var scpt = document.getElementsByTagName('script')[0];
++     scpt.parentNode.insertBefore(elem,scpt);
++   }());
++
++  var qcdata = {qacct: '<?php print $vars['pcode']; ?>',
++                uid: '<?php print $vars['uid']; ?>'};
++ //--><!]]>
+ </script>
+ <noscript>
+-  <div style="display:none;"><img src="//pixel.quantserve.com/pixel/<?php print $vars['pcode']; ?>.gif" border="0" height="1" width="1" alt="Quantcast"/></div>
++  <img src="//pixel.quantserve.com/pixel/<?php print $vars['pcode']; ?>.gif?labels=_fp.event.Default" style="display: none;" border="0" height="1" width="1" alt="Quantcast"/>
+ </noscript>
+diff --git a/theme/quantcast-tag-head.tpl.php b/theme/quantcast-tag-head.tpl.php
+index 653429a..7c4c196 100644
+--- a/theme/quantcast-tag-head.tpl.php
++++ b/theme/quantcast-tag-head.tpl.php
+@@ -1,13 +1,15 @@
+-<script type="text/javascript">
+-<!--//--><![CDATA[//><!--
+-  var _qevents = _qevents || [];
+-  (function() {
+-    var elem = document.createElement('script');
+-    elem.src = (document.location.protocol == "https:" ? "https://secure" : "http://edge") + ".quantserve.com/quant.js";
+-    elem.async = true;
+-    elem.type = "text/javascript";
+-    var scpt = document.getElementsByTagName('script')[0];
+-    scpt.parentNode.insertBefore(elem, scpt);
+-  })();
+-//--><!]]>
++
++ <script>
++ <!--//--><![CDATA[//><!--
++  qcdata = {} || qcdata;
++  (function(){
++     var elem = document.createElement('script');
++     elem.src = (document.location.protocol == "https:" ? "https://secure" : "http://pixel") + ".quantserve.com/aquant.js?a=<?php print $vars['pcode']; ?>";
++     elem.async = true;
++     elem.type = "text/javascript";
++     var scpt = document.getElementsByTagName('script')[0];
++     scpt.parentNode.insertBefore(elem,scpt);
++   }());
++
++ //--><!]]>
+ </script>
