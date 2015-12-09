@@ -1,0 +1,21 @@
+diff --git a/modules/taboola_dfp_native/taboola_dfp_native.module b/modules/taboola_dfp_native/taboola_dfp_native.module
+index 1c75999..df0034e 100644
+--- a/modules/taboola_dfp_native/taboola_dfp_native.module
++++ b/modules/taboola_dfp_native/taboola_dfp_native.module
+@@ -114,6 +114,7 @@ function _taboola_dfp_native_add_js($tags) {
+ 
+   // Drupal.settings.taboolaDfpNative.aaa = "test "; alert("testtt");
+   $js = array();
++  $js[] = 'googletag.cmd.push(function() {';
+   $js[] = 'googletag.pubads().addEventListener("slotRenderEnded", function(event) {';
+   $js[] = ' try {';
+ 
+@@ -148,6 +149,8 @@ function _taboola_dfp_native_add_js($tags) {
+   $js[] = ' } catch (e) {';
+   $js[] = ' }';
+   $js[] = '});';
++  // End of googletag.pubads().addEventListener
++  $js[] = '});';
+ 
+   drupal_add_js(implode(PHP_EOL, $js), array(
+     'type' => 'inline',
