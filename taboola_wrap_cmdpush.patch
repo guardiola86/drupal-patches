@@ -15,7 +15,7 @@ index 1c75999..fe46310 100644
    $js[] = ' }';
    $js[] = '});';
 +  // End of cmd.push
-+  $js[] = ‘});’;
++  $js[] = '});';
  
    drupal_add_js(implode(PHP_EOL, $js), array(
      'type' => 'inline',
