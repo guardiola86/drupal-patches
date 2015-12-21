@@ -1,0 +1,22 @@
+diff --git a/chartbeat.module b/chartbeat.module
+index 2cbf882..88a8e8a 100644
+--- a/chartbeat.module
++++ b/chartbeat.module
+@@ -53,7 +53,6 @@ function chartbeat_page_alter(&$page) {
+   $uid = variable_get('chartbeat_uid', '');
+   if (!empty($uid)) {
+     $output = <<<EOT
+-<script type="text/javascript">
+   var _sf_async_config=Drupal.settings.chartbeat;
+   (function(){
+     function loadChartbeat() {
+@@ -70,8 +69,7 @@ function chartbeat_page_alter(&$page) {
+     window.onload = (typeof window.onload != 'function') ?
+        loadChartbeat : function() { oldonload(); loadChartbeat(); };
+   })();
+-</script>
+ EOT;
+-    $page['page_bottom']['chartbeat'] = array('#markup' => $output);
++    drupal_add_js($output, array('type' => 'inline', 'scope' => 'footer'));
+   }
+ }
