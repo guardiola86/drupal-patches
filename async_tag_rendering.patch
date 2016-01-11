@@ -24,10 +24,7 @@ index 4b45bde..2108db4 100644
 +  if (variable_get('dfp_async_rendering', 1)) {
 +    $googleScript = array(
 +      '(function() {',
-+        'console.log("Tag Start");',
-+        'document.addEventListener("DOMContentLoaded", function(event) { console.log("DOM Loaded"); });',
 +        'var gads = document.createElement("script");',
-+        'gads.onload = function() { console.log("Tag Loaded"); };',
 +        'gads.async = true;',
 +        'gads.type = "text/javascript";',
 +        'var useSSL = "https:" == document.location.protocol;',
@@ -150,7 +147,7 @@ index 4b45bde..2108db4 100644
    $js = '';
 +
 +  if (variable_get('dfp_async_rendering', 1)) {
-+    $js = 'googletag.cmd.push(function() { console.log("FIRE");';
++    $js = 'googletag.cmd.push(function() {';
 +  }
    // Start by defining breakpoints for this ad.
    if (!empty($tag->breakpoints)) {
