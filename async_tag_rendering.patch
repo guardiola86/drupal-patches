@@ -1,5 +1,5 @@
 diff --git a/dfp.module b/dfp.module
-index 4b45bde..2108db4 100644
+index 51b249d..c7939a5 100644
 --- a/dfp.module
 +++ b/dfp.module
 @@ -662,6 +662,7 @@ function _dfp_get_ad_category($term, $clean_string = FALSE) {
@@ -10,7 +10,7 @@ index 4b45bde..2108db4 100644
    // Initialize the google varibales and inject user-defined javascript.
    $js = 'var googletag = googletag || {};' . "\n";
    $js .= 'googletag.cmd = googletag.cmd || [];';
-@@ -678,17 +679,83 @@ function _dfp_js_global_settings() {
+@@ -678,17 +679,80 @@ function _dfp_js_global_settings() {
      'force header' => TRUE,
    );
    drupal_add_js($js, $options);
@@ -24,10 +24,7 @@ index 4b45bde..2108db4 100644
 +  if (variable_get('dfp_async_rendering', 1)) {
 +    $googleScript = array(
 +      '(function() {',
-+        'console.log("Tag Start");',
-+        'document.addEventListener("DOMContentLoaded", function(event) { console.log("DOM Loaded"); });',
 +        'var gads = document.createElement("script");',
-+        'gads.onload = function() { console.log("Tag Loaded"); };',
 +        'gads.async = true;',
 +        'gads.type = "text/javascript";',
 +        'var useSSL = "https:" == document.location.protocol;',
@@ -95,7 +92,7 @@ index 4b45bde..2108db4 100644
    if (variable_get('dfp_async_rendering', 1)) {
      $js .= '  googletag.pubads().enableAsyncRendering();' . "\n";
    }
-@@ -723,18 +790,39 @@ function _dfp_js_global_settings() {
+@@ -720,18 +784,39 @@ function _dfp_js_global_settings() {
      }
    }
  
@@ -144,18 +141,18 @@ index 4b45bde..2108db4 100644
  }
  
  /**
-@@ -744,6 +832,10 @@ function _dfp_js_global_settings() {
+@@ -741,6 +826,10 @@ function _dfp_js_global_settings() {
  function _dfp_js_slot_definition($tag) {
    // Add the js needed to define this adSlot to <head>.
    $js = '';
 +
 +  if (variable_get('dfp_async_rendering', 1)) {
-+    $js = 'googletag.cmd.push(function() { console.log("FIRE");';
++    $js = 'googletag.cmd.push(function() {';
 +  }
    // Start by defining breakpoints for this ad.
    if (!empty($tag->breakpoints)) {
      $breakpoints = $tag->breakpoints;
-@@ -790,6 +882,11 @@ function _dfp_js_slot_definition($tag) {
+@@ -787,6 +876,11 @@ function _dfp_js_slot_definition($tag) {
    if (!empty($tag->breakpoints)) {
      $js .= '  .defineSizeMapping(mapping)' . "\n";
    }
@@ -167,7 +164,7 @@ index 4b45bde..2108db4 100644
    $js = rtrim($js, "\n") . ';';
  
    $options = array(
-@@ -797,6 +894,7 @@ function _dfp_js_slot_definition($tag) {
+@@ -794,6 +888,7 @@ function _dfp_js_slot_definition($tag) {
      'group' => JS_LIBRARY,
      'weight' => 0,
    );
