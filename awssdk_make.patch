@@ -1,0 +1,16 @@
+diff --git a/awssdk.make b/awssdk.make
+index 25d51ea..cf9e7b7 100644
+--- a/awssdk.make
++++ b/awssdk.make
+@@ -2,9 +2,6 @@
+ api = 2
+ core = 7.x
+ 
+-projects[awssdk][type] = library
+-projects[awssdk][download][type] = git
+-projects[awssdk][download][url] = https://github.com/amazonwebservices/aws-sdk-for-php.git
+-projects[awssdk][download][tag] = 1.5.10
++libraries[awssdk][download][type] = "file"
++libraries[awssdk][download][url] = https://github.com/amazonwebservices/aws-sdk-for-php/archive/1.5.10.zip
+ 
+-projects[libraries] = 2
