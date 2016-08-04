@@ -28,7 +28,7 @@ index c40b6ef..e99e589 100644
          $build['view'] = array(
            '#markup' => $output,
 diff --git a/taxonomy_display.module b/taxonomy_display.module
-index 5df3632..68b03e1 100644
+index 5df3632..6d01150 100644
 --- a/taxonomy_display.module
 +++ b/taxonomy_display.module
 @@ -142,11 +142,20 @@ function taxonomy_display_menu_alter(&$items) {
@@ -57,7 +57,7 @@ index 5df3632..68b03e1 100644
  }
  
  /**
-@@ -340,15 +349,27 @@ function taxonomy_display_save_taxonomy_display($machine_name, $save_data = arra
+@@ -340,15 +349,28 @@ function taxonomy_display_save_taxonomy_display($machine_name, $save_data = arra
  }
  
  /**
@@ -90,7 +90,7 @@ index 5df3632..68b03e1 100644
    // Ensure custom display settings for taxonomy term page are enabled before
    // altering.
    $view_mode = field_view_mode_settings('taxonomy_term', $term->vocabulary_machine_name);
-@@ -360,10 +381,6 @@ function taxonomy_display_taxonomy_term_page($term) {
+@@ -360,10 +382,6 @@ function taxonomy_display_taxonomy_term_page($term) {
    // Expose our $term object to altering.
    drupal_alter('taxonomy_display_term_page_term_object', $term);
  
@@ -101,7 +101,7 @@ index 5df3632..68b03e1 100644
    // Load settings for this vocabulary term.
    $display_settings = taxonomy_display_fetch_taxonomy_display($term->vocabulary_machine_name);
  
-@@ -385,7 +402,16 @@ function taxonomy_display_taxonomy_term_page($term) {
+@@ -385,7 +403,16 @@ function taxonomy_display_taxonomy_term_page($term) {
  
    // Associated content display
    $associated_display = new $display_settings->associated_display_plugin;
@@ -119,7 +119,7 @@ index 5df3632..68b03e1 100644
  
    return $build;
  }
-@@ -393,19 +419,45 @@ function taxonomy_display_taxonomy_term_page($term) {
+@@ -393,19 +420,45 @@ function taxonomy_display_taxonomy_term_page($term) {
  /**
   * Title callback; display title for term pages.
   *
