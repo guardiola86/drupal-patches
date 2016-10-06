@@ -1,0 +1,14 @@
+diff --git a/file_entity.pages.inc b/file_entity.pages.inc
+index ee58c90..7ec26c9 100644
+--- a/file_entity.pages.inc
++++ b/file_entity.pages.inc
+@@ -145,6 +145,9 @@ function file_entity_add_upload_multiple_submit($form, &$form_state) {
+       // Note - not using file_move here because if we call file_get_mime
+       // (in file_uri_to_object) while it has a .tmp extension, it horks.
+ 
++      // Ensure writable destination directory for the files.
++      file_prepare_directory($upload_location, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
++
+       $destination = file_unmanaged_move($source, $destination, FILE_EXISTS_RENAME);
+ 
+       $file = file_uri_to_object($destination);
