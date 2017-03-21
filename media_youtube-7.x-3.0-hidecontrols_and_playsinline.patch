@@ -1,0 +1,58 @@
+diff --git a/includes/media_youtube.formatters.inc b/includes/media_youtube.formatters.inc
+index 970251f..b911d57 100644
+--- a/includes/media_youtube.formatters.inc
++++ b/includes/media_youtube.formatters.inc
+@@ -29,6 +29,8 @@ function media_youtube_file_formatter_info() {
+       'showinfo' => TRUE,
+       'theme' => 'dark',
+       'captions' => FALSE,
++      'hidecontrols' => FALSE,
++      'playsinline' => TRUE,
+     ),
+     'view callback' => 'media_youtube_file_formatter_video_view',
+     'settings callback' => 'media_youtube_file_formatter_video_settings',
+@@ -66,7 +68,7 @@ function media_youtube_file_formatter_video_view($file, $display, $langcode) {
+     // Fake a default for attributes so the ternary doesn't choke.
+     $display['settings']['attributes'] = array();
+ 
+-    foreach (array('width', 'height', 'autohide', 'autoplay', 'color', 'enablejsapi', 'loop', 'modestbranding', 'nocookie', 'origin', 'protocol', 'protocol_specify', 'rel', 'showinfo', 'theme', 'attributes', 'captions') as $setting) {
++    foreach (array('width', 'height', 'autohide', 'autoplay', 'color', 'enablejsapi', 'loop', 'modestbranding', 'nocookie', 'origin', 'protocol', 'protocol_specify', 'rel', 'showinfo', 'theme', 'attributes', 'captions', 'hidecontrols', 'playsinline') as $setting) {
+       $element['#options'][$setting] = isset($file->override[$setting]) ? $file->override[$setting] : $display['settings'][$setting];
+     }
+ 
+@@ -146,6 +148,16 @@ function media_youtube_file_formatter_video_settings($form, &$form_state, $setti
+     '#type' => 'checkbox',
+     '#default_value' => $settings['loop'],
+   );
++  $element['hidecontrols'] = array(
++    '#title' => t('Hide controls'),
++    '#type' => 'checkbox',
++    '#default_value' => $settings['hidecontrols'],
++  );
++  $element['playsinline'] = array(
++    '#title' => t('Plays Inline (iOS)'),
++    '#type' => 'checkbox',
++    '#default_value' => $settings['playsinline'],
++  );
+ 
+   // Note: make sure the positive/negitive language lines up with option
+   // processing in media_youtube.theme.inc.
+diff --git a/themes/media_youtube.theme.inc b/themes/media_youtube.theme.inc
+index 25e339e..297632f 100644
+--- a/themes/media_youtube.theme.inc
++++ b/themes/media_youtube.theme.inc
+@@ -84,6 +84,14 @@ function media_youtube_preprocess_media_youtube_video(&$variables) {
+       }
+     }
+   }
++  if ($variables['options']['hidecontrols']) {
++    // Add controls parameters to the query.
++    $query['controls'] = '0';
++  }
++  if ($variables['options']['playsinline']) {
++    // Add iOS plays inline parameter to query.
++    $query['playsinline'] = '1';
++  }
+ 
+   // Non-query options.
+   if ($variables['options']['nocookie']) {
