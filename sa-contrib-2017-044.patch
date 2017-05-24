@@ -1,0 +1,25 @@
+diff --git a/includes/media.browser.inc b/includes/media.browser.inc
+index 09d340f..120dfac 100644
+--- a/includes/media.browser.inc
++++ b/includes/media.browser.inc
+@@ -20,6 +20,20 @@ function media_browser($selected = NULL) {
+     'multiselect' => FALSE,
+   );
+ 
++  // Filter out everything except a whitelist of known safe options.
++  $safe_options = array(
++    'activePlugins',
++    'fid',
++    'id',
++    'multiselect',
++    'options',
++    'plugins',
++    'render',
++    'types',
++    'render_multi_edit_form',
++  );
++  $params = array_intersect_key($params, array_flip($safe_options));
++
+   // Transform text 'true' and 'false' to actual booleans.
+   foreach ($params as $k => $v) {
+     if ($v === 'true') { $params[$k] = TRUE; }
