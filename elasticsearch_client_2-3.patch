@@ -1,0 +1,17 @@
+diff --git a/elasticsearch_connector.module b/elasticsearch_connector.module
+index cbf16a5..c17654a 100644
+--- a/elasticsearch_connector.module
++++ b/elasticsearch_connector.module
+@@ -822,7 +822,11 @@ function elasticsearch_connector_load_library($cluster) {
+ 
+         drupal_alter('elasticsearch_connector_load_library_options', $options, $cluster);
+ 
+-        $clients[$cluster->cluster_id] = new \Elasticsearch\Client($options);
++        // Instantiate a new ClientBuilder
++        $clientBuilder = \Elasticsearch\ClientBuilder::create();
++        $clientBuilder->setHosts($options['hosts']);
++        // Build the client object
++        $clients[$cluster->cluster_id] = $clientBuilder->build();
+       }
+       catch (Exception $e) {
+         drupal_set_message($e->getMessage(), 'error');
