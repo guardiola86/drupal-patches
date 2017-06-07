@@ -1,8 +1,27 @@
 diff --git a/elasticsearch_connector.module b/elasticsearch_connector.module
-index cbf16a5..c17654a 100644
+index cbf16a5..37d32ab 100644
 --- a/elasticsearch_connector.module
 +++ b/elasticsearch_connector.module
-@@ -822,7 +822,11 @@ function elasticsearch_connector_load_library($cluster) {
+@@ -792,15 +792,10 @@ function elasticsearch_connector_load_library($cluster) {
+     if (valid_url($cluster->url)) {
+       $options = array(
+         'hosts' => array($cluster->url),
+-        'guzzleOptions' => array(
+-          'curl.options' => array(
+-            CURLOPT_DNS_USE_GLOBAL_CACHE    => TRUE,
+-            CURLOPT_IPRESOLVE               => CURL_IPRESOLVE_V4,
+-            CURLOPT_CONNECTTIMEOUT          => (!empty($cluster->options['timeout']) ? $cluster->options['timeout'] : ELASTICSEARCH_CONNECTOR_DEFAULT_TIMEOUT)
+-          )
+-        )
+       );
+-
++      if (empty($cluster->options['timeout'])) {
++        $cluster->options['timeout'] = ELASTICSEARCH_CONNECTOR_DEFAULT_TIMEOUT;
++      }
+       if (!empty($cluster->options['use_authentication'])) {
+         $options['connectionParams'] = array(
+           'auth'    => array($cluster->options['username'], $cluster->options['password'], $cluster->options['authentication_type']),
+@@ -822,7 +817,11 @@ function elasticsearch_connector_load_library($cluster) {
  
          drupal_alter('elasticsearch_connector_load_library_options', $options, $cluster);
  
@@ -15,3 +34,12 @@ index cbf16a5..c17654a 100644
        }
        catch (Exception $e) {
          drupal_set_message($e->getMessage(), 'error');
+@@ -878,7 +877,7 @@ function elasticsearch_connector_get_cluster_info($cluster, $enable_messages = F
+   $client = elasticsearch_connector_load_library($cluster);
+   if (!empty($client)) {
+     try {
+-      $info = $client->info();
++      $info = $client->info(array('client' => array('connect_timeout' => $cluster->options['timeout'])));
+       $result['client'] = $client;
+       $result['info'] = $result['state'] = $result['health'] = $result['stats'] = array();
+       if (elasticsearch_connector_check_status($info)) {
