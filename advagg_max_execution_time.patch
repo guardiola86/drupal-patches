@@ -21,3 +21,12 @@ index eb98750..22b78fa 100644
 +          if ($name === 'memory_limit' && $current === -1) {
 +            continue;
 +          }
++
++          // maxExecutionTime exception: allow 0 for "no memory limit".
++          if ($name === 'max_execution_time' && $current === 0) {
++            continue;
++          }
++
++          ini_set($name, $suggested);
+         }
+     }
