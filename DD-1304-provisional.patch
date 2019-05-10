@@ -1,0 +1,13 @@
+diff --git a/core/modules/views/src/EventSubscriber/ViewsEntitySchemaSubscriber.php b/core/modules/views/src/EventSubscriber/ViewsEntitySchemaSubscriber.php
+index 5cacac3..b8abcd6 100644
+--- a/core/modules/views/src/EventSubscriber/ViewsEntitySchemaSubscriber.php
++++ b/core/modules/views/src/EventSubscriber/ViewsEntitySchemaSubscriber.php
+@@ -199,7 +199,7 @@ public function onEntityTypeUpdate(EntityTypeInterface $entity_type, EntityTypeI
+       // called during updates, when it is not safe to rely on configuration
+       // containing valid schema. Trust the data and disable schema validation
+       // and casting.
+-      $view->trustData()->save();
++      //$view->trustData()->save();
+     }
+   }
+ 
